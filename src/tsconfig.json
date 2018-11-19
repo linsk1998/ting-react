@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"jsx": "react",
+		"target": "es3",
+		"allowJs": false,
+		"declaration": true,
+		"lib": [
+			"es5",
+			"es2015.core",
+			"es2017.object",
+			"es2015.collection",
+			"es2015.promise",
+			"dom"
+		],
+		"typeRoots" : ["../typings","../node_modules/@types"],
+		"types" : ["react", "react-dom", "sky-bucket"],
+		"module" : "amd",
+		//"rootDir": "./",
+		"outFile": "../dist/ting/index.js",
+		//"outDir": "../dist",
+		"sourceMap": false,
+		"noEmitHelpers":true,
+		"watch": true
+	},
+	"include": [
+		"./**/*"
+	],
+	"compileOnSave": true
+}
