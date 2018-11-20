@@ -5,22 +5,27 @@ import * as ReactDOM from "react-dom";
 
 var routers:Set<Route>=new Set();
 
-export interface IProps{
+export class HashRouter extends Component<any,any>{
+	render(){
+		return this.props.children;
+	}
+}
+export interface RouteProps{
 	path?:string,
 	location?:string,
+	exact?:boolean,
 	component?:React.ComponentType<any>,
-	require?:string,
+	import?:string,
 	export?:string
 };
-export interface IStates{
+export interface RouteStates{
 	currentPath?:string,
 	component?:React.ComponentType<any>
 }
-
-export class Route extends Component<IProps,IStates>{
+export class Route extends Component<RouteProps,RouteStates>{
 	private location:string;
 	private isLoading:boolean;
-	constructor(props:IProps,context){
+	constructor(props:RouteProps,context){
 		if(props.location==void 0){
 			props.location="";
 		}
@@ -45,35 +50,41 @@ export class Route extends Component<IProps,IStates>{
 			curPath=currentPath();
 		}
 		var mypath=this.props.location+this.props.path;
-		if((curPath+"/").startsWith(mypath+"/")){
+		if(this.props.exact && curPath===mypath || (curPath+"/").startsWith(mypath+"/") && !this.props.exact){
 			if(this.props.component){
 				return React.createElement(this.props.component, this.props, this.props.children);
 			}else if(this.state && this.state.component){
 				return React.createElement(this.state.component, this.props, this.props.children);
-			}else if(this.props.require && !this.isLoading){
+			}else if(this.props.import && !this.isLoading){
 				this.isLoading=true;
 				var me=this;
-				window.require([this.props.require],function(module){
-					me.setState({component:module});
-				});
+				import(this.props.import).then(function(module){
+					if(me.props.export){
+						me.setState({component:module[this.props.export]});
+					}else{
+						me.setState({component:module});
+					}
+				})
 			}
 			return this.props.children;
 		}
 		return null;
 	}
 	checkChild(children,location){
-		children.forEach && children.forEach(function(child){
-			if(child.props){
-				if(child.type===Route){
-					child.props.location=location;
-				}else{
-					this.checkChild(child.props.children,location);
+		if(Array.isArray(children)){
+			children.forEach(function(child){
+				if(child.props){
+					if(child.type===Route){
+						child.props.location=location;
+					}else{
+						this.checkChild(child.props.children,location);
+					}
 				}
-			}
-		},this);
+			},this);
+		}
 	}
 }
-export class Link extends Component<{to:string},any>{
+export class Link extends Component<{to:string,[key:string]:any},any>{
 	render(){
 		var {to,...rest}=this.props;
 		if('onhashchange' in window){
@@ -106,6 +117,3 @@ function detach(path){
 		router.setState({currentPath:path});
 	});
 }
-import('ting').then(function(moment) {
-    console.log(moment);
-  })
