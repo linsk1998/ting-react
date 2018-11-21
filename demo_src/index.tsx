@@ -2,20 +2,100 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import {Fragment} from "react";
-import {Link,Route} from "ting";
+import {Link,Route,HashRouter,Layout,Header,Content,Sider} from "ting";
 
-ReactDOM.render(<Fragment>
-	<Link to="/123">1/123</Link>
-	<Link to="">Home</Link>
-	<Route>Home
-	</Route>
-	<Route path="/123">123
-		<Link to="/123/123">2/123/123</Link>
-		<Link to="/123/456">2/123/456</Link>
-		<Route path="/123">2.123
-		</Route>
-		<Route path="/456" export="asd">2.456
-		</Route>
-	</Route>
-</Fragment>, document.body
-);
+export class App extends React.Component<any,any>{
+	render(){
+		return <Layout full>
+			<Header>
+				<PageHeader></PageHeader>
+			</Header>
+			<Header height={20}></Header>
+			<Layout className="container-fluid">
+				<Sider width={250}>
+					<Sidebar></Sidebar>
+				</Sider>
+				<Sider width={20}></Sider>
+				<Content className="box-pllg">
+					<HashRouter>
+						<Route exact>
+							<article>
+								<h1>ting-react</h1>
+								<p>ting-react是一个极高兼容的React组件库</p>
+							</article>
+						</Route>
+						<Route path="/Button" import="demo/Button"></Route>
+						<Route path="/Icon" import="demo/Icon"></Route>
+						<Route path="/Layout" import="demo/Layout"></Route>
+						<Route path="/todo" exact>
+							<article>
+								<h1>此页面未完成</h1>
+							</article>
+						</Route>
+					</HashRouter>
+				</Content>
+			</Layout>
+		</Layout>;
+	}
+}
+export class PageHeader extends React.Component<any,any>{
+	render(){
+		return <div className="container-fluid">
+			<div className="navbar navbar-top pull-front">
+				<div className="navbar-header">
+					<button type="button" className="navbar-toggle fa fa-lg">&#xf0c9;</button>
+					<Link to="" className="navbar-brand"><img height="37" src="/linsk1998/ting/master/images/logo.png"/><span className="line-middle">Ting Web UI</span></Link>
+				</div>
+				<ul className="navbar-nav">
+					<li><a href="/linsk1998/ting/master/index.html">CSS样式库</a></li>
+					<li className="active"><Link to="">React组件</Link></li>
+				</ul>
+			</div>
+		</div>;
+	}
+}
+export class Sidebar extends React.Component<any,any>{
+	render(){
+		return <div className="sidebar sidebar-nav">
+			<div className="sidebar-nav-header">
+				<span className="align-middle">通用</span>
+			</div>
+			<div className="sidebar-nav-body">
+				<ul className="nav-list">
+					<li><Link to="/Button" className="nav-list-item"><i className="fa fa-fw">&#xf096;</i> Button <small>按钮</small></Link></li>
+					<li><Link to="/Icon" className="nav-list-item"><i className="fa fa-fw">&#xf2b4;</i> Icon <small>图标</small></Link></li>
+				</ul>
+			</div>
+			<div className="sidebar-nav-header">
+				<span className="align-middle">布局</span>
+			</div>
+			<div className="sidebar-nav-body">
+				<ul className="nav-list">
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf0ce;</i> Grid <small>栅格</small></Link></li>
+					<li><Link to="/Layout" className="nav-list-item"><i className="fa fa-fw">&#xf0db;</i> Layout <small>布局</small></Link></li>
+				</ul>
+			</div>
+			<div className="sidebar-nav-header">
+				<span className="align-middle">导航</span>
+			</div>
+			<div className="sidebar-nav-body">
+				<ul className="nav-list">
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf141;</i> Breadcrumb <small>面包屑</small></Link></li>
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf0c9;</i> Navbar <small>导航条</small></Link></li>
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf152;</i> Pagination <small>分页</small></Link></li>
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf0cb;</i> Steps <small>步骤条</small></Link></li>
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf150;</i> Dropdown <small>下拉菜单</small></Link></li>
+				</ul>
+			</div>
+			<div className="sidebar-nav-header">
+				<span className="align-middle">数据展示</span>
+			</div>
+			<div className="sidebar-nav-body">
+				<ul className="nav-list">
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf00b;</i> Tabs <small>标签页</small></Link></li>
+					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf27b;</i> Popover <small>气泡卡片</small></Link></li>
+				</ul>
+			</div>
+		</div>;
+	}
+}

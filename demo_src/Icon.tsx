@@ -1,12 +1,9 @@
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {Fragment} from "react";
 import {Icon} from "ting";
 
-var btnStyle={ marginRight:"10px"};
-
-ReactDOM.render(<Fragment>
+export=()=><article>
 	<h2>字体图标</h2>
 	<Icon size={32}>&#xf000;</Icon>
 	<Icon size={32}>&#xf001;</Icon>
@@ -51,5 +48,4 @@ ReactDOM.render(<Fragment>
 	<Icon size={144}
 		gif="/linsk1998/spinfox/master/spinfox.gif"
 	/>
-</Fragment>, document.getElementById("DEMO")
-);
+</article>;

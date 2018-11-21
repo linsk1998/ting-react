@@ -1,11 +1,10 @@
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {Fragment} from "react";
 import {Button,ButtonGroup,ButtonToolbar} from "ting";
 
 var btnStyle={ marginRight:"10px"};
-ReactDOM.render(<Fragment>
+export=()=><article>
 	<h2>普通按钮</h2>
 	<Button style={btnStyle} type="primary" onClick={function(e){ alert("你点击了按钮");}}>Primary</Button>
 	<Button style={btnStyle}>hello</Button>
@@ -49,5 +48,4 @@ ReactDOM.render(<Fragment>
 			<Button>按钮 3</Button>
 		</ButtonGroup>
 	</ButtonToolbar>
-</Fragment>, document.getElementById("DEMO")
-);
+</article>;
