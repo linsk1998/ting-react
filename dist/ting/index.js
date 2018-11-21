@@ -248,6 +248,17 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
     "use strict";
     exports.__esModule = true;
     var routers = new Set();
+    var HashRouter = /** @class */ (function (_super) {
+        __extends(HashRouter, _super);
+        function HashRouter() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        HashRouter.prototype.render = function () {
+            return this.props.children;
+        };
+        return HashRouter;
+    }(react_3.Component));
+    exports.HashRouter = HashRouter;
     ;
     var Route = /** @class */ (function (_super) {
         __extends(Route, _super);
@@ -271,6 +282,7 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
             routers.add(this);
         };
         Route.prototype.render = function () {
+            var _this = this;
             var curPath;
             if (this.state && this.state.currentPath != void 0) {
                 curPath = this.state.currentPath;
@@ -279,18 +291,23 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
                 curPath = currentPath();
             }
             var mypath = this.props.location + this.props.path;
-            if ((curPath + "/").startsWith(mypath + "/")) {
+            if (this.props.exact && curPath === mypath || (curPath + "/").startsWith(mypath + "/") && !this.props.exact) {
                 if (this.props.component) {
                     return React.createElement(this.props.component, this.props, this.props.children);
                 }
                 else if (this.state && this.state.component) {
                     return React.createElement(this.state.component, this.props, this.props.children);
                 }
-                else if (this.props.require && !this.isLoading) {
+                else if (this.props["import"] && !this.isLoading) {
                     this.isLoading = true;
                     var me = this;
-                    window.require([this.props.require], function (module) {
-                        me.setState({ component: module });
+                    new Promise(function (resolve_1, reject_1) { require([_this.props["import"]], resolve_1, reject_1); }).then(function (module) {
+                        if (me.props["export"]) {
+                            me.setState({ component: module[this.props["export"]] });
+                        }
+                        else {
+                            me.setState({ component: module });
+                        }
                     });
                 }
                 return this.props.children;
@@ -298,16 +315,18 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
             return null;
         };
         Route.prototype.checkChild = function (children, location) {
-            children.forEach && children.forEach(function (child) {
-                if (child.props) {
-                    if (child.type === Route) {
-                        child.props.location = location;
+            if (Array.isArray(children)) {
+                children.forEach(function (child) {
+                    if (child.props) {
+                        if (child.type === Route) {
+                            child.props.location = location;
+                        }
+                        else {
+                            this.checkChild(child.props.children, location);
+                        }
                     }
-                    else {
-                        this.checkChild(child.props.children, location);
-                    }
-                }
-            }, this);
+                }, this);
+            }
         };
         return Route;
     }(react_3.Component));
@@ -353,11 +372,345 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
             router.setState({ currentPath: path });
         });
     }
-    new Promise(function (resolve_1, reject_1) { require(['ting'], resolve_1, reject_1); }).then(function (moment) {
-        console.log(moment);
-    });
 });
-define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router"], function (require, exports, button, icon, loader) {
+define("ting/layout", ["require", "exports", "react"], function (require, exports, React) {
     "use strict";
-    return __assign({}, button, icon, loader);
+    exports.__esModule = true;
+    ;
+    var Layout = /** @class */ (function (_super) {
+        __extends(Layout, _super);
+        function Layout() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Layout.prototype.render = function () {
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    if (child.type == Header) {
+                        return React.createElement(VGroup, __assign({}, this.props), this.props.children);
+                    }
+                    else if (child.type == Sider) {
+                        return React.createElement(HGroup, __assign({}, this.props), this.props.children);
+                    }
+                }
+            }
+            return null;
+        };
+        return Layout;
+    }(React.Component));
+    exports.Layout = Layout;
+    var VGroup = /** @class */ (function (_super) {
+        __extends(VGroup, _super);
+        function VGroup() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        VGroup.prototype.renderTable = function () {
+            var className = this.props.className;
+            if (this.props.full) {
+                className += " box-full";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case Layout:
+                        case VGroup:
+                        case HGroup:
+                        case Content:
+                            child.props.dirction = 2;
+                    }
+                }
+            }
+            switch (this.props.dirction) {
+                case 1:
+                    return React.createElement("td", { className: className + " layout-cell" },
+                        React.createElement("table", { className: "layout-table", width: "100%", height: "100%" },
+                            React.createElement("tbody", null, children)));
+                case 2:
+                    return { children: children };
+                default:
+                    return React.createElement("table", { className: className + " row-fill layout-table", width: "100%", height: this.props.height },
+                        React.createElement("tbody", null, children));
+            }
+        };
+        VGroup.prototype.renderFlex = function () {
+            var className = this.props.className + " col-flex";
+            if (this.props.full) {
+                className += " box-full";
+            }
+            else {
+                className += " flex";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case Layout:
+                        case VGroup:
+                        case HGroup:
+                        case Content:
+                            child.props.dirction = 2;
+                    }
+                }
+            }
+            switch (this.props.dirction) {
+                case 1:
+                    className += " row-center";
+                    break;
+                case 2:
+                    className += " row-fill";
+                    break;
+            }
+            var style = {};
+            var height = this.props.height;
+            if (height) {
+                if (typeof height !== "number")
+                    height = height + "px";
+                style.height = height;
+            }
+            return React.createElement("div", { className: className, style: style }, children);
+        };
+        VGroup.prototype.render = function () {
+            if (!Sky.browser.quirks) {
+                return this.renderFlex();
+            }
+            return this.renderTable();
+        };
+        VGroup.defaultProps = {
+            className: ""
+        };
+        return VGroup;
+    }(React.Component));
+    exports.VGroup = VGroup;
+    var HGroup = /** @class */ (function (_super) {
+        __extends(HGroup, _super);
+        function HGroup() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        HGroup.prototype.renderTable = function () {
+            var className = this.props.className;
+            if (this.props.full) {
+                className += " box-full";
+            }
+            else {
+                className += " flex";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case Layout:
+                        case VGroup:
+                        case HGroup:
+                        case Content:
+                            child.props.dirction = 1;
+                    }
+                }
+            }
+            switch (this.props.dirction) {
+                case 1:
+                    return { children: children };
+                case 2:
+                    if (!Sky.browser.quirks) {
+                        return React.createElement("div", { className: className + " row-fill" },
+                            React.createElement("table", { className: "layout-table", width: "100%" },
+                                React.createElement("tbody", null,
+                                    React.createElement("tr", null, children))));
+                    }
+                    else {
+                        return React.createElement("tr", null,
+                            React.createElement("td", { className: className + " layout-cell", height: "100%" },
+                                React.createElement("div", { className: "box-full" },
+                                    React.createElement("table", { className: "layout-table", width: "100%", height: "100%" },
+                                        React.createElement("tbody", null,
+                                            React.createElement("tr", null, children))))));
+                    }
+                default:
+                    return React.createElement("table", { className: className + " layout-table", height: this.props.height },
+                        React.createElement("tbody", null,
+                            React.createElement("tr", null, children)));
+            }
+        };
+        HGroup.prototype.renderFlex = function () {
+            var className = this.props.className + " row-flex";
+            if (this.props.full) {
+                className += " box-full";
+            }
+            else {
+                className += " flex";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case Layout:
+                        case VGroup:
+                        case HGroup:
+                        case Content:
+                            child.props.dirction = 1;
+                    }
+                }
+            }
+            switch (this.props.dirction) {
+                case 1:
+                    className += " col-center";
+                    break;
+                case 2:
+                    className += " row-fill";
+                    break;
+            }
+            var style = {};
+            var height = this.props.height;
+            if (height) {
+                if (typeof height !== "number")
+                    height = height + "px";
+                style.height = height;
+            }
+            return React.createElement("div", { className: className, style: style }, children);
+        };
+        HGroup.prototype.render = function () {
+            if ('atob' in window) {
+                return this.renderFlex();
+            }
+            return this.renderTable();
+        };
+        HGroup.defaultProps = {
+            className: ""
+        };
+        return HGroup;
+    }(React.Component));
+    exports.HGroup = HGroup;
+    var Header = /** @class */ (function (_super) {
+        __extends(Header, _super);
+        function Header() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Header.prototype.renderTable = function () {
+            return React.createElement("tr", null,
+                React.createElement("td", { height: this.props.height, className: this.props.className + " layout-cell" }, this.props.children));
+        };
+        Header.prototype.renderFlex = function () {
+            var style;
+            if (this.props.height) {
+                style = { height: this.props.height + "px" };
+            }
+            return React.createElement("div", { className: "row-fixed " + this.props.className, style: style }, this.props.children);
+        };
+        Header.prototype.render = function () {
+            if (!Sky.browser.quirks) {
+                return this.renderFlex();
+            }
+            return this.renderTable();
+        };
+        Header.defaultProps = {
+            className: ""
+        };
+        return Header;
+    }(React.Component));
+    exports.Header = Header;
+    var Sider = /** @class */ (function (_super) {
+        __extends(Sider, _super);
+        function Sider() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Sider.prototype.renderTableQuirks = function () {
+            var width = this.props.width;
+            if (!width) {
+                width = 0;
+            }
+            return React.createElement("td", { width: width, vAlign: "top", className: "layout-cell " + this.props.className },
+                React.createElement("div", { className: "box-full" }, this.props.children));
+        };
+        Sider.prototype.renderTable = function () {
+            return React.createElement("td", { width: this.props.width, vAlign: "top", className: "layout-cell" }, this.props.children);
+        };
+        Sider.prototype.renderFlex = function () {
+            var style;
+            if (this.props.width) {
+                style = { width: this.props.width + "px" };
+            }
+            return React.createElement("div", { className: "col-sider " + this.props.className, style: style }, this.props.children);
+        };
+        Sider.prototype.render = function () {
+            if ('atob' in window) {
+                return this.renderFlex();
+            }
+            if (Sky.browser.quirks) {
+                return this.renderTableQuirks();
+            }
+            return this.renderTable();
+        };
+        Sider.defaultProps = {
+            className: ""
+        };
+        return Sider;
+    }(React.Component));
+    exports.Sider = Sider;
+    var Content = /** @class */ (function (_super) {
+        __extends(Content, _super);
+        function Content(props, context) {
+            var _this = this;
+            if (props.className == null) {
+                props.className = "";
+            }
+            _this = _super.call(this, props, context) || this;
+            return _this;
+        }
+        Content.prototype.renderTable = function () {
+            return React.createElement("td", { vAlign: "top", className: this.props.className }, this.props.children);
+        };
+        Content.prototype.renderTableQuirks = function () {
+            var className;
+            switch (this.props.dirction) {
+                case 1:
+                    return React.createElement("td", { vAlign: "top", className: "layout-cell" },
+                        React.createElement("div", { className: "box-full " + this.props.className }, this.props.children));
+                case 2:
+                    return React.createElement("tr", null,
+                        React.createElement("td", { vAlign: "top", height: "100%", className: "layout-cell" },
+                            React.createElement("div", { className: "box-full " + this.props.className }, this.props.children)));
+            }
+        };
+        Content.prototype.renderFlex = function () {
+            var className;
+            switch (this.props.dirction) {
+                case 1:
+                    className = "col-center " + this.props.className;
+                    break;
+                case 2:
+                    className = "row-fill " + this.props.className;
+                    break;
+            }
+            return React.createElement("div", { className: className }, this.props.children);
+        };
+        Content.prototype.render = function () {
+            if ('atob' in window) {
+                return this.renderFlex();
+            }
+            if (Sky.browser.quirks) {
+                return this.renderTableQuirks();
+            }
+            if (this.props.dirction == 1) {
+                return this.renderTable();
+            }
+            return this.renderFlex();
+        };
+        return Content;
+    }(React.Component));
+    exports.Content = Content;
+    exports.Footer = Header;
+});
+define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button, icon, loader, layout) {
+    "use strict";
+    return __assign({}, button, icon, loader, layout);
 });

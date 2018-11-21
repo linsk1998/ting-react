@@ -57,21 +57,25 @@ declare module "ting/icon" {
 declare module "ting/router" {
     import { Component } from "react";
     import * as React from "react";
-    export interface IProps {
+    export class HashRouter extends Component<any, any> {
+        render(): React.ReactNode;
+    }
+    export interface RouteProps {
         path?: string;
         location?: string;
+        exact?: boolean;
         component?: React.ComponentType<any>;
-        require?: string;
+        import?: string;
         export?: string;
     }
-    export interface IStates {
+    export interface RouteStates {
         currentPath?: string;
         component?: React.ComponentType<any>;
     }
-    export class Route extends Component<IProps, IStates> {
+    export class Route extends Component<RouteProps, RouteStates> {
         private location;
         private isLoading;
-        constructor(props: IProps, context: any);
+        constructor(props: RouteProps, context: any);
         componentWillUnmount(): void;
         componentWillMount(): void;
         render(): {};
@@ -79,19 +83,100 @@ declare module "ting/router" {
     }
     export class Link extends Component<{
         to: string;
+        [key: string]: any;
     }, any> {
         render(): JSX.Element;
     }
     export function navigate(path: any): void;
     export function linkClickHandle(e: any): void;
 }
+declare module "ting/layout" {
+    import * as React from "react";
+    export interface HChildProps {
+        width: number;
+        className?: string;
+    }
+    export interface VChildProps {
+        height?: number;
+        className?: string;
+    }
+    export interface LayoutProps {
+        full?: boolean;
+        height?: number | string;
+        className?: string;
+        dirction?: number;
+    }
+    export interface LayoutStates {
+    }
+    export class Layout extends React.Component<LayoutProps, LayoutStates> {
+        render(): JSX.Element;
+    }
+    export class VGroup extends React.Component<LayoutProps, LayoutStates> {
+        static defaultProps: {
+            className: string;
+        };
+        renderTable(): JSX.Element | {
+            children: React.ReactNode;
+        };
+        renderFlex(): JSX.Element;
+        render(): JSX.Element | {
+            children: React.ReactNode;
+        };
+    }
+    export class HGroup extends React.Component<LayoutProps, LayoutStates> {
+        static defaultProps: {
+            className: string;
+        };
+        renderTable(): JSX.Element | {
+            children: React.ReactNode;
+        };
+        renderFlex(): JSX.Element;
+        render(): JSX.Element | {
+            children: React.ReactNode;
+        };
+    }
+    export class Header extends React.Component<VChildProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        renderTable(): JSX.Element;
+        renderFlex(): JSX.Element;
+        render(): JSX.Element;
+    }
+    export class Sider extends React.Component<HChildProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        renderTableQuirks(): JSX.Element;
+        renderTable(): JSX.Element;
+        renderFlex(): JSX.Element;
+        render(): JSX.Element;
+    }
+    export class Content extends React.Component<LayoutProps, any> {
+        constructor(props: any, context: any);
+        renderTable(): JSX.Element;
+        renderTableQuirks(): JSX.Element;
+        renderFlex(): JSX.Element;
+        render(): JSX.Element;
+    }
+    export var Footer: typeof Header;
+}
 declare module "ting" {
     import * as button from "ting/button";
     import * as icon from "ting/icon";
     import * as loader from "ting/router";
+    import * as layout from "ting/layout";
     const _default: {
+        Layout: typeof layout.Layout;
+        VGroup: typeof layout.VGroup;
+        HGroup: typeof layout.HGroup;
+        Header: typeof layout.Header;
+        Sider: typeof layout.Sider;
+        Content: typeof layout.Content;
+        Footer: typeof layout.Header;
         navigate(path: any): void;
         linkClickHandle(e: any): void;
+        HashRouter: typeof loader.HashRouter;
         Route: typeof loader.Route;
         Link: typeof loader.Link;
         Icon: typeof icon.Icon;
