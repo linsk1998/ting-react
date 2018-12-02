@@ -1,36 +1,39 @@
 define(["require", "exports", "react", "ting"], function (require, exports, React, ting_1) {
     "use strict";
-    exports.__esModule = true;
-    var App = /** @class */ (function (_super) {
-        __extends(App, _super);
-        function App() {
-            return _super !== null && _super.apply(this, arguments) || this;
+    var PageLoader = /** @class */ (function (_super) {
+        __extends(PageLoader, _super);
+        function PageLoader(props) {
+            var _this = _super.call(this, props) || this;
+            _this.state = {
+                component: null,
+                isError: false
+            };
+            var me = _this;
+            new Promise(function (resolve_1, reject_1) { require([_this.props["import"]], resolve_1, reject_1); }).then(function (module) {
+                if (me.props["export"]) {
+                    me.setState({ component: module[me.props["export"]] });
+                }
+                else {
+                    me.setState({ component: module });
+                }
+            }, function () {
+                me.setState({ isError: true });
+            });
+            return _this;
         }
-        App.prototype.render = function () {
-            return React.createElement(ting_1.Layout, { full: true },
-                React.createElement(ting_1.Header, null,
-                    React.createElement(PageHeader, null)),
-                React.createElement(ting_1.Header, { height: 20 }),
-                React.createElement(ting_1.Layout, { className: "container-fluid" },
-                    React.createElement(ting_1.Sider, { width: 250 },
-                        React.createElement(Sidebar, null)),
-                    React.createElement(ting_1.Sider, { width: 20 }),
-                    React.createElement(ting_1.Content, { className: "box-pllg" },
-                        React.createElement(ting_1.HashRouter, null,
-                            React.createElement(ting_1.Route, { exact: true },
-                                React.createElement("article", null,
-                                    React.createElement("h1", null, "ting-react"),
-                                    React.createElement("p", null, "ting-react\u662F\u4E00\u4E2A\u6781\u9AD8\u517C\u5BB9\u7684React\u7EC4\u4EF6\u5E93"))),
-                            React.createElement(ting_1.Route, { path: "/Button", "import": "demo/Button" }),
-                            React.createElement(ting_1.Route, { path: "/Icon", "import": "demo/Icon" }),
-                            React.createElement(ting_1.Route, { path: "/Layout", "import": "demo/Layout" }),
-                            React.createElement(ting_1.Route, { path: "/todo", exact: true },
-                                React.createElement("article", null,
-                                    React.createElement("h1", null, "\u6B64\u9875\u9762\u672A\u5B8C\u6210")))))));
+        PageLoader.prototype.render = function () {
+            if (this.state.isError) {
+                return React.createElement("div", { className: "alert alert-danger" }, "\u9875\u9762\u52A0\u8F7D\u5931\u8D25");
+            }
+            if (this.state.component) {
+                return React.createElement(this.state.component, this.props, this.props.children);
+            }
+            else {
+                return React.createElement("div", null, "\u52A0\u8F7D\u4E2D...");
+            }
         };
-        return App;
+        return PageLoader;
     }(React.Component));
-    exports.App = App;
     var PageHeader = /** @class */ (function (_super) {
         __extends(PageHeader, _super);
         function PageHeader() {
@@ -52,7 +55,6 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
         };
         return PageHeader;
     }(React.Component));
-    exports.PageHeader = PageHeader;
     var Sidebar = /** @class */ (function (_super) {
         __extends(Sidebar, _super);
         function Sidebar() {
@@ -134,5 +136,26 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
         };
         return Sidebar;
     }(React.Component));
-    exports.Sidebar = Sidebar;
+    return function () {
+        return React.createElement(ting_1.Layout, { full: true },
+            React.createElement(ting_1.Header, null,
+                React.createElement(PageHeader, null)),
+            React.createElement(ting_1.Header, { height: 20 }),
+            React.createElement(ting_1.Layout, { className: "container-fluid" },
+                React.createElement(ting_1.Sider, { width: 250 },
+                    React.createElement(Sidebar, null)),
+                React.createElement(ting_1.Sider, { width: 20 }),
+                React.createElement(ting_1.Content, { className: "box-pllg" },
+                    React.createElement(ting_1.HashRouter, null,
+                        React.createElement(ting_1.Route, { exact: true },
+                            React.createElement("article", null,
+                                React.createElement("h1", null, "ting-react"),
+                                React.createElement("p", null, "ting-react\u662F\u4E00\u4E2A\u6781\u9AD8\u517C\u5BB9\u7684React\u7EC4\u4EF6\u5E93"))),
+                        React.createElement(ting_1.Route, { path: "/Button", component: PageLoader, "import": "demo/Button" }),
+                        React.createElement(ting_1.Route, { path: "/Icon", component: PageLoader, "import": "demo/Icon" }),
+                        React.createElement(ting_1.Route, { path: "/Layout", component: PageLoader, "import": "demo/Layout" }),
+                        React.createElement(ting_1.Route, { path: "/todo", exact: true },
+                            React.createElement("article", null,
+                                React.createElement("h1", null, "\u6B64\u9875\u9762\u672A\u5B8C\u6210")))))));
+    };
 });

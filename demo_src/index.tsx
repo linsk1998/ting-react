@@ -4,41 +4,67 @@ import * as ReactDOM from "react-dom";
 import {Fragment} from "react";
 import {Link,Route,HashRouter,Layout,Header,Content,Sider} from "ting";
 
-export class App extends React.Component<any,any>{
+export=()=>
+<Layout full>
+	<Header>
+		<PageHeader></PageHeader>
+	</Header>
+	<Header height={20}></Header>
+	<Layout className="container-fluid">
+		<Sider width={250}>
+			<Sidebar></Sidebar>
+		</Sider>
+		<Sider width={20}></Sider>
+		<Content className="box-pllg">
+			<HashRouter>
+				<Route exact>
+					<article>
+						<h1>ting-react</h1>
+						<p>ting-react是一个极高兼容的React组件库</p>
+					</article>
+				</Route>
+				<Route path="/Button" component={PageLoader} import="demo/Button"></Route>
+				<Route path="/Icon" component={PageLoader} import="demo/Icon"></Route>
+				<Route path="/Layout" component={PageLoader} import="demo/Layout"></Route>
+				<Route path="/todo" exact>
+					<article>
+						<h1>此页面未完成</h1>
+					</article>
+				</Route>
+			</HashRouter>
+		</Content>
+	</Layout>
+</Layout>;
+class PageLoader extends React.Component<{import?:string,export?:string},{component:React.ComponentType<any>,isError:boolean}>{
+	constructor(props){
+		super(props);
+		this.state={
+			component:null,
+			isError:false
+		};
+		var me=this;
+		import(this.props.import).then(function(module){
+			if(me.props.export){
+				me.setState({component:module[me.props.export]});
+			}else{
+				me.setState({component:module});
+			}
+		},function(){
+			me.setState({isError:true});
+		});
+	}
 	render(){
-		return <Layout full>
-			<Header>
-				<PageHeader></PageHeader>
-			</Header>
-			<Header height={20}></Header>
-			<Layout className="container-fluid">
-				<Sider width={250}>
-					<Sidebar></Sidebar>
-				</Sider>
-				<Sider width={20}></Sider>
-				<Content className="box-pllg">
-					<HashRouter>
-						<Route exact>
-							<article>
-								<h1>ting-react</h1>
-								<p>ting-react是一个极高兼容的React组件库</p>
-							</article>
-						</Route>
-						<Route path="/Button" import="demo/Button"></Route>
-						<Route path="/Icon" import="demo/Icon"></Route>
-						<Route path="/Layout" import="demo/Layout"></Route>
-						<Route path="/todo" exact>
-							<article>
-								<h1>此页面未完成</h1>
-							</article>
-						</Route>
-					</HashRouter>
-				</Content>
-			</Layout>
-		</Layout>;
+		if(this.state.isError){
+			return <div className="alert alert-danger">页面加载失败</div>
+		}
+		if(this.state.component){
+			return React.createElement(this.state.component, this.props, this.props.children);
+		}else{
+			return <div>加载中...</div>
+		}
 	}
 }
-export class PageHeader extends React.Component<any,any>{
+class PageHeader extends React.Component<{},{}>{
 	render(){
 		return <div className="container-fluid">
 			<div className="navbar navbar-top pull-front">
@@ -54,7 +80,7 @@ export class PageHeader extends React.Component<any,any>{
 		</div>;
 	}
 }
-export class Sidebar extends React.Component<any,any>{
+class Sidebar extends React.Component<{},{}>{
 	render(){
 		return <div className="sidebar sidebar-nav">
 			<div className="sidebar-nav-header">

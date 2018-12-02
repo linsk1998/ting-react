@@ -128,6 +128,9 @@ declare namespace Sky{
 
 	function addEvent(ele:HTMLElement,event:string,callback?:Function);
 	function removeEvent(ele:HTMLElement,event?:string,callback?:Function);
+	function attachEvent(ele:HTMLElement|Window,event:string,callback?:Function);
+	function detachEvent(ele:HTMLElement|Window,event:string,callback?:Function);
+	function fireEvent(ele:HTMLElement|Window,event:string);
 	function delegate(ele:HTMLElement,selector:string,event:string,callback?:Function);
 	function undelegate(ele:HTMLElement,selector:string,event?:string,callback?:Function);
 }

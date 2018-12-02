@@ -2,23 +2,21 @@
 define("apng-supported", [], function () {
     var apng_supported = false;
     var canvas = document.createElement("canvas");
-    if (canvas.getContext) {
-        var apngTest = new Image();
-        var ctx = canvas.getContext("2d");
-        this.delay(function (resolve, reject) {
-            apngTest.onload = function () {
-                ctx.drawImage(this, 0, 0);
-                resolve(ctx.getImageData(0, 0, 1, 1).data[3] === 0);
-            };
-            apngTest.onerror = function () {
-                resolve(false);
-            };
-            apngTest.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
-        });
-    }
-    else {
+    if (!canvas.getContext) {
         return false;
     }
+    var apngTest = new Image();
+    var ctx = canvas.getContext("2d");
+    this.delay(function (resolve, reject) {
+        apngTest.onload = function () {
+            ctx.drawImage(this, 0, 0);
+            resolve(ctx.getImageData(0, 0, 1, 1).data[3] === 0);
+        };
+        apngTest.onerror = function () {
+            resolve(false);
+        };
+        apngTest.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
+    });
 });
 (function () {
     var html5Styles, unknownElements;
@@ -118,28 +116,26 @@ define("ting/button", ["require", "exports", "react", "react"], function (requir
 define("webp-animation-supported", [], function () {
     var webp_supported = false;
     var canvas = document.createElement("canvas");
-    if (canvas.getContext) {
-        var webpTest = new Image();
-        this.delay(function (resolve, reject) {
-            webpTest.onload = function () {
-                if (webpTest.width > 0 && webpTest.height > 0) {
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(webpTest, 0, 0);
-                    resolve(ctx.getImageData(0, 0, 1, 1).data[3] !== 0);
-                }
-                else {
-                    resolve(false);
-                }
-            };
-            webpTest.onerror = function () {
-                resolve(false);
-            };
-            webpTest.src = "data:image/webp;base64,UklGRpQAAABXRUJQVlA4WAoAAAACAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GMAAAAAAAAAAAAAAAAAAAAGQAAAJWUDggGAAAADABAJ0BKgEAAQACADQlpAADcAD++/1QAEFOTUYwAAAAAAAAAAAAAAAAAAAAZAAAAlZQOCAYAAAAMAEAnQEqAQABAAIANCWkAANwAP77lAAA";
-        });
-    }
-    else {
+    if (!canvas.getContext) {
         return false;
     }
+    var webpTest = new Image();
+    this.delay(function (resolve, reject) {
+        webpTest.onload = function () {
+            if (webpTest.width > 0 && webpTest.height > 0) {
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(webpTest, 0, 0);
+                resolve(ctx.getImageData(0, 0, 1, 1).data[3] !== 0);
+            }
+            else {
+                resolve(false);
+            }
+        };
+        webpTest.onerror = function () {
+            resolve(false);
+        };
+        webpTest.src = "data:image/webp;base64,UklGRpQAAABXRUJQVlA4WAoAAAACAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GMAAAAAAAAAAAAAAAAAAAAGQAAAJWUDggGAAAADABAJ0BKgEAAQACADQlpAADcAD++/1QAEFOTUYwAAAAAAAAAAAAAAAAAAAAZAAAAlZQOCAYAAAAMAEAnQEqAQABAAIANCWkAANwAP77lAAA";
+    });
 });
 define("ting/icon", ["require", "exports", "react", "react", "apng-supported", "webp-animation-supported"], function (require, exports, react_2, React, apng_supported, webp_animation_supported) {
     "use strict";
@@ -247,14 +243,33 @@ define("ting/icon", ["require", "exports", "react", "react", "apng-supported", "
 define("ting/router", ["require", "exports", "react", "react"], function (require, exports, react_3, React) {
     "use strict";
     exports.__esModule = true;
-    var routers = new Set();
+    var RouterContext = React.createContext({
+        history: "hashHistory",
+        location: "",
+        currentPath: ""
+    });
     var HashRouter = /** @class */ (function (_super) {
         __extends(HashRouter, _super);
-        function HashRouter() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        function HashRouter(props, context) {
+            var _this = _super.call(this, props, context) || this;
+            _this.state = {
+                currentPath: currentPath()
+            };
+            return _this;
         }
+        HashRouter.prototype.componentWillUnmount = function () {
+            routers["delete"](this);
+        };
+        HashRouter.prototype.componentWillMount = function () {
+            routers.add(this);
+        };
         HashRouter.prototype.render = function () {
-            return this.props.children;
+            var context = {
+                history: 'hashHistory',
+                location: "",
+                currentPath: this.state.currentPath
+            };
+            return React.createElement(RouterContext.Provider, { value: context }, this.props.children);
         };
         return HashRouter;
     }(react_3.Component));
@@ -262,71 +277,25 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
     ;
     var Route = /** @class */ (function (_super) {
         __extends(Route, _super);
-        function Route(props, context) {
-            var _this = this;
-            if (props.location == void 0) {
-                props.location = "";
-            }
-            if (props.path == void 0) {
-                props.path = "";
-            }
-            _this = _super.call(this, props, context) || this;
-            _this.checkChild(_this.props.children, props.location + props.path);
-            _this.isLoading = false;
-            return _this;
+        function Route() {
+            return _super !== null && _super.apply(this, arguments) || this;
         }
-        Route.prototype.componentWillUnmount = function () {
-            routers["delete"](this);
-        };
-        Route.prototype.componentWillMount = function () {
-            routers.add(this);
-        };
         Route.prototype.render = function () {
-            var _this = this;
-            var curPath;
-            if (this.state && this.state.currentPath != void 0) {
-                curPath = this.state.currentPath;
-            }
-            else {
-                curPath = currentPath();
-            }
-            var mypath = this.props.location + this.props.path;
-            if (this.props.exact && curPath === mypath || (curPath + "/").startsWith(mypath + "/") && !this.props.exact) {
-                if (this.props.component) {
-                    return React.createElement(this.props.component, this.props, this.props.children);
-                }
-                else if (this.state && this.state.component) {
-                    return React.createElement(this.state.component, this.props, this.props.children);
-                }
-                else if (this.props["import"] && !this.isLoading) {
-                    this.isLoading = true;
-                    var me = this;
-                    new Promise(function (resolve_1, reject_1) { require([_this.props["import"]], resolve_1, reject_1); }).then(function (module) {
-                        if (me.props["export"]) {
-                            me.setState({ component: module[this.props["export"]] });
-                        }
-                        else {
-                            me.setState({ component: module });
-                        }
-                    });
-                }
-                return this.props.children;
-            }
-            return null;
-        };
-        Route.prototype.checkChild = function (children, location) {
-            if (Array.isArray(children)) {
-                children.forEach(function (child) {
-                    if (child.props) {
-                        if (child.type === Route) {
-                            child.props.location = location;
-                        }
-                        else {
-                            this.checkChild(child.props.children, location);
-                        }
+            var me = this;
+            return React.createElement(RouterContext.Consumer, null, function (context) {
+                var curPath = context.currentPath;
+                var mypath = context.location + me.props.path;
+                if (me.props.exact && curPath === mypath || (curPath + "/").startsWith(mypath + "/") && !me.props.exact) {
+                    if (me.props.component) {
+                        return React.createElement(me.props.component, me.props, me.props.children);
                     }
-                }, this);
-            }
+                    return me.props.children;
+                }
+                return null;
+            });
+        };
+        Route.defaultProps = {
+            path: ""
         };
         return Route;
     }(react_3.Component));
@@ -338,14 +307,17 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
         }
         Link.prototype.render = function () {
             var _a = this.props, to = _a.to, rest = __rest(_a, ["to"]);
-            if ('onhashchange' in window) {
-                return React.createElement("a", __assign({ href: "#" + to }, rest));
-            }
-            return React.createElement("a", __assign({ href: "#" + to }, rest, { onClick: linkClickHandle }));
+            return React.createElement(RouterContext.Consumer, null, function (context) {
+                if ('onhashchange' in window) {
+                    return React.createElement("a", __assign({ href: "#" + to }, rest));
+                }
+                return React.createElement("a", __assign({ href: "#" + to }, rest, { onClick: linkClickHandle }));
+            });
         };
         return Link;
     }(react_3.Component));
     exports.Link = Link;
+    var routers = new Set();
     function currentPath() {
         var path = location.hash.replace(/^#/, "");
         return path;
@@ -362,10 +334,24 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
         detach(target.href.replace(/^[^#]*#/, ""));
     }
     exports.linkClickHandle = linkClickHandle;
+    function onhashchange() {
+        detach(currentPath());
+    }
     if ('onhashchange' in window) {
-        window.onload = window.onhashchange = function () {
-            detach(currentPath());
-        };
+        Sky.ready().then(onhashchange);
+        if (Sky.browser.quirks) {
+            var oldHash = location.hash;
+            setInterval(function () {
+                var hash = location.hash;
+                if (oldHash !== hash) {
+                    oldHash = hash;
+                    detach(currentPath());
+                }
+            }, 100);
+        }
+        else {
+            Sky.attachEvent(window, 'hashchange', onhashchange);
+        }
     }
     function detach(path) {
         routers.forEach(function (router) {

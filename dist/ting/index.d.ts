@@ -57,29 +57,25 @@ declare module "ting/icon" {
 declare module "ting/router" {
     import { Component } from "react";
     import * as React from "react";
-    export class HashRouter extends Component<any, any> {
-        render(): React.ReactNode;
+    export class HashRouter extends Component<{}, {
+        currentPath: string;
+    }> {
+        constructor(props: any, context: any);
+        componentWillUnmount(): void;
+        componentWillMount(): void;
+        render(): JSX.Element;
     }
     export interface RouteProps {
         path?: string;
-        location?: string;
         exact?: boolean;
         component?: React.ComponentType<any>;
-        import?: string;
-        export?: string;
+        [key: string]: any;
     }
-    export interface RouteStates {
-        currentPath?: string;
-        component?: React.ComponentType<any>;
-    }
-    export class Route extends Component<RouteProps, RouteStates> {
-        private location;
-        private isLoading;
-        constructor(props: RouteProps, context: any);
-        componentWillUnmount(): void;
-        componentWillMount(): void;
-        render(): {};
-        checkChild(children: any, location: any): void;
+    export class Route extends Component<RouteProps, {}> {
+        static defaultProps: {
+            path: string;
+        };
+        render(): JSX.Element;
     }
     export class Link extends Component<{
         to: string;

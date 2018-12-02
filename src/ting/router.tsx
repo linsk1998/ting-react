@@ -3,38 +3,18 @@ import {Component} from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-var routers:Set<Route>=new Set();
+var RouterContext=React.createContext({
+	history:"hashHistory",
+	location:"",
+	currentPath:""
+});
 
-export class HashRouter extends Component<any,any>{
-	render(){
-		return this.props.children;
-	}
-}
-export interface RouteProps{
-	path?:string,
-	location?:string,
-	exact?:boolean,
-	component?:React.ComponentType<any>,
-	import?:string,
-	export?:string
-};
-export interface RouteStates{
-	currentPath?:string,
-	component?:React.ComponentType<any>
-}
-export class Route extends Component<RouteProps,RouteStates>{
-	private location:string;
-	private isLoading:boolean;
-	constructor(props:RouteProps,context){
-		if(props.location==void 0){
-			props.location="";
-		}
-		if(props.path==void 0){
-			props.path="";
-		}
+export class HashRouter extends Component<{},{currentPath:string}>{
+	constructor(props,context){
 		super(props,context);
-		this.checkChild(this.props.children,props.location+props.path);
-		this.isLoading=false;
+		this.state={
+			currentPath:currentPath()
+		};
 	}
 	componentWillUnmount(){
 		routers.delete(this);
@@ -43,56 +23,56 @@ export class Route extends Component<RouteProps,RouteStates>{
 		routers.add(this);
 	}
 	render(){
-		var curPath;
-		if(this.state && this.state.currentPath!=void 0){
-			curPath=this.state.currentPath;
-		}else{
-			curPath=currentPath();
-		}
-		var mypath=this.props.location+this.props.path;
-		if(this.props.exact && curPath===mypath || (curPath+"/").startsWith(mypath+"/") && !this.props.exact){
-			if(this.props.component){
-				return React.createElement(this.props.component, this.props, this.props.children);
-			}else if(this.state && this.state.component){
-				return React.createElement(this.state.component, this.props, this.props.children);
-			}else if(this.props.import && !this.isLoading){
-				this.isLoading=true;
-				var me=this;
-				import(this.props.import).then(function(module){
-					if(me.props.export){
-						me.setState({component:module[this.props.export]});
-					}else{
-						me.setState({component:module});
-					}
-				})
-			}
-			return this.props.children;
-		}
-		return null;
+		var context={
+			history:'hashHistory',
+			location:"",
+			currentPath:this.state.currentPath
+		};
+		return <RouterContext.Provider value={context}>{this.props.children}</RouterContext.Provider>;
 	}
-	checkChild(children,location){
-		if(Array.isArray(children)){
-			children.forEach(function(child){
-				if(child.props){
-					if(child.type===Route){
-						child.props.location=location;
-					}else{
-						this.checkChild(child.props.children,location);
+}
+export interface RouteProps{
+	path?:string,
+	exact?:boolean,
+	component?:React.ComponentType<any>,
+	[key:string]:any
+};
+export class Route extends Component<RouteProps,{}>{
+	static defaultProps={ 
+		path:""
+	}
+	render(){
+		var me=this;
+		return <RouterContext.Consumer>
+			{function(context){
+				var curPath=context.currentPath;
+				var mypath=context.location+me.props.path;
+				if(me.props.exact && curPath===mypath || (curPath+"/").startsWith(mypath+"/") && !me.props.exact){
+					if(me.props.component){
+						return React.createElement(me.props.component, me.props, me.props.children);
 					}
+					return me.props.children;
 				}
-			},this);
-		}
+				return null;
+			}}
+		</RouterContext.Consumer>;
 	}
 }
 export class Link extends Component<{to:string,[key:string]:any},any>{
 	render(){
 		var {to,...rest}=this.props;
-		if('onhashchange' in window){
-			return <a href={"#"+to} {...rest}/>;
-		}
-		return <a href={"#"+to} {...rest} onClick={linkClickHandle}/>;
+		return <RouterContext.Consumer>
+			{function(context){
+				if('onhashchange' in window){
+					return <a href={"#"+to} {...rest}/>;
+				}
+				return <a href={"#"+to} {...rest} onClick={linkClickHandle}/>;
+			}}
+		</RouterContext.Consumer>;
 	}
 }
+
+var routers:Set<HashRouter>=new Set();
 function currentPath(){
 	var path=location.hash.replace(/^#/,"");
 	return path;
@@ -107,10 +87,23 @@ export function linkClickHandle(e){
 	var target=e.currentTarget as HTMLAnchorElement;
 	detach(target.href.replace(/^[^#]*#/,""));
 }
+function onhashchange(){
+	detach(currentPath());
+}
 if('onhashchange' in window){
-	window.onload=window.onhashchange=function(){
-		detach(currentPath());
-	};
+	Sky.ready().then(onhashchange);
+	if(Sky.browser.quirks){
+		var oldHash=location.hash;
+		setInterval(function(){
+			var hash=location.hash;
+			if(oldHash!==hash){
+				oldHash=hash;
+				detach(currentPath());
+			}
+		},100);
+	}else{
+		Sky.attachEvent(window,'hashchange',onhashchange);
+	}
 }
 function detach(path){
 	routers.forEach(function(router){
