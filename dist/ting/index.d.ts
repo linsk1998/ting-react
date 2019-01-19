@@ -1,8 +1,4 @@
 /// <reference types="react" />
-declare module "apng-supported" {
-    const _default: true;
-    export = _default;
-}
 declare module "ting/button" {
     import { Component } from "react";
     import * as React from "react";
@@ -28,9 +24,21 @@ declare module "ting/button" {
         render(): JSX.Element;
     }
 }
-declare module "webp-animation-supported" {
+declare module "support/apng-supported-plugin!" {
     const _default: true;
-    export = _default;
+    export default _default;
+}
+declare module "support/apng-supported" {
+    import supported from "support/apng-supported-plugin!";
+    export default supported;
+}
+declare module "support/webp-animation-supported-plugin!" {
+    const _default: true;
+    export default _default;
+}
+declare module "support/webp-animation-supported" {
+    import supported from "support/webp-animation-supported-plugin!";
+    export default supported;
 }
 declare module "ting/icon" {
     import { Component } from "react";
@@ -193,44 +201,4 @@ declare module "ting" {
         ButtonToolbar: typeof button.ButtonToolbar;
     };
     export = _default;
-}
-declare module "ting/layout-flex" {
-    import * as React from "react";
-    import { VShrinkProps, ContentProps, SiderProps, LayoutProps } from "ting/layout";
-    export class VShrink extends React.Component<VShrinkProps, {}> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
-    export class VContent extends React.Component<ContentProps, {}> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
-    export class VGroup extends React.Component<LayoutProps, {}> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
-    export class Sider extends React.Component<SiderProps, any> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
-    export class HContent extends React.Component<ContentProps, any> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
-    export class HGroup extends React.Component<LayoutProps, {}> {
-        static defaultProps: {
-            className: string;
-        };
-        render(): JSX.Element;
-    }
 }

@@ -3,8 +3,8 @@ import {Component} from "react";
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import apng_supported=require("apng-supported");
-import webp_animation_supported=require("webp-animation-supported");
+import apng_supported from "support/apng-supported";
+import webp_animation_supported from "support/webp-animation-supported";
 
 export interface IProps{
 	size?:number,

@@ -1,23 +1,3 @@
-//该模块非amd模块，无法使用requirejs
-define("apng-supported", [], function () {
-    var apng_supported = false;
-    var canvas = document.createElement("canvas");
-    if (!canvas.getContext) {
-        return false;
-    }
-    var apngTest = new Image();
-    var ctx = canvas.getContext("2d");
-    this.delay(function (resolve, reject) {
-        apngTest.onload = function () {
-            ctx.drawImage(this, 0, 0);
-            resolve(ctx.getImageData(0, 0, 1, 1).data[3] === 0);
-        };
-        apngTest.onerror = function () {
-            resolve(false);
-        };
-        apngTest.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
-    });
-});
 (function () {
     var html5Styles, unknownElements;
     try {
@@ -112,32 +92,66 @@ define("ting/button", ["require", "exports", "react", "react"], function (requir
     }(react_1.Component));
     exports.ButtonToolbar = ButtonToolbar;
 });
-//该模块非amd模块，无法使用requirejs
-define("webp-animation-supported", [], function () {
-    var webp_supported = false;
-    var canvas = document.createElement("canvas");
-    if (!canvas.getContext) {
-        return false;
-    }
-    var webpTest = new Image();
-    this.delay(function (resolve, reject) {
-        webpTest.onload = function () {
-            if (webpTest.width > 0 && webpTest.height > 0) {
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(webpTest, 0, 0);
-                resolve(ctx.getImageData(0, 0, 1, 1).data[3] !== 0);
-            }
-            else {
+define("support/apng-supported-plugin", [], function () {
+    return {
+        load: function (path, require, resolve) {
+            var apng_supported = false;
+            var canvas = document.createElement("canvas");
+            if (!canvas.getContext) {
                 resolve(false);
+                return;
             }
-        };
-        webpTest.onerror = function () {
-            resolve(false);
-        };
-        webpTest.src = "data:image/webp;base64,UklGRpQAAABXRUJQVlA4WAoAAAACAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GMAAAAAAAAAAAAAAAAAAAAGQAAAJWUDggGAAAADABAJ0BKgEAAQACADQlpAADcAD++/1QAEFOTUYwAAAAAAAAAAAAAAAAAAAAZAAAAlZQOCAYAAAAMAEAnQEqAQABAAIANCWkAANwAP77lAAA";
-    });
+            var apngTest = new Image();
+            var ctx = canvas.getContext("2d");
+            apngTest.onload = function () {
+                ctx.drawImage(this, 0, 0);
+                resolve(ctx.getImageData(0, 0, 1, 1).data[3] === 0);
+            };
+            apngTest.onerror = function () {
+                resolve(false);
+            };
+            apngTest.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
+        }
+    };
 });
-define("ting/icon", ["require", "exports", "react", "react", "apng-supported", "webp-animation-supported"], function (require, exports, react_2, React, apng_supported, webp_animation_supported) {
+define("support/apng-supported", ["require", "exports", "support/apng-supported-plugin!"], function (require, exports, apng_supported_plugin_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports["default"] = apng_supported_plugin_1["default"];
+});
+define("support/webp-animation-supported-plugin", [], function () {
+    return {
+        load: function (path, require, resolve) {
+            var webp_supported = false;
+            var canvas = document.createElement("canvas");
+            if (!canvas.getContext) {
+                resolve(false);
+                return;
+            }
+            var webpTest = new Image();
+            webpTest.onload = function () {
+                if (webpTest.width > 0 && webpTest.height > 0) {
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(webpTest, 0, 0);
+                    resolve(ctx.getImageData(0, 0, 1, 1).data[3] !== 0);
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            webpTest.onerror = function () {
+                resolve(false);
+            };
+            webpTest.src = "data:image/webp;base64,UklGRpQAAABXRUJQVlA4WAoAAAACAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GMAAAAAAAAAAAAAAAAAAAAGQAAAJWUDggGAAAADABAJ0BKgEAAQACADQlpAADcAD++/1QAEFOTUYwAAAAAAAAAAAAAAAAAAAAZAAAAlZQOCAYAAAAMAEAnQEqAQABAAIANCWkAANwAP77lAAA";
+        }
+    };
+});
+define("support/webp-animation-supported", ["require", "exports", "support/webp-animation-supported-plugin!"], function (require, exports, webp_animation_supported_plugin_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports["default"] = webp_animation_supported_plugin_1["default"];
+});
+define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported"], function (require, exports, react_2, React, apng_supported_1, webp_animation_supported_1) {
     "use strict";
     exports.__esModule = true;
     ;
@@ -196,10 +210,10 @@ define("ting/icon", ["require", "exports", "react", "react", "apng-supported", "
                 if (svg && ('SVGRect' in window)) {
                     return this.renderImg(size, svg, rest);
                 }
-                if (apng && apng_supported) {
+                if (apng && apng_supported_1["default"]) {
                     return this.renderImg(size, apng, rest);
                 }
-                if (awebp && webp_animation_supported) {
+                if (awebp && webp_animation_supported_1["default"]) {
                     return this.renderImg(size, awebp, rest);
                 }
                 if (png) {
@@ -713,147 +727,4 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
 define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button, icon, loader, layout) {
     "use strict";
     return __assign({}, button, icon, loader, layout);
-});
-define("ting/layout-flex", ["require", "exports", "react", "ting/layout"], function (require, exports, React, layout_1) {
-    "use strict";
-    exports.__esModule = true;
-    var VShrink = /** @class */ (function (_super) {
-        __extends(VShrink, _super);
-        function VShrink() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        VShrink.prototype.render = function () {
-            var style;
-            if (this.props.height) {
-                style = { height: this.props.height + "px" };
-            }
-            return React.createElement("div", { className: "row-fixed " + this.props.className, style: style }, this.props.children);
-        };
-        VShrink.defaultProps = {
-            className: ""
-        };
-        return VShrink;
-    }(React.Component));
-    exports.VShrink = VShrink;
-    var VContent = /** @class */ (function (_super) {
-        __extends(VContent, _super);
-        function VContent() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        VContent.prototype.render = function () {
-            return React.createElement("div", { className: "row-fill " + this.props.className }, this.props.children);
-        };
-        VContent.defaultProps = {
-            className: ""
-        };
-        return VContent;
-    }(React.Component));
-    exports.VContent = VContent;
-    var VGroup = /** @class */ (function (_super) {
-        __extends(VGroup, _super);
-        function VGroup() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        VGroup.prototype.render = function () {
-            var className = this.props.className + " col-flex";
-            if (!this.props.height) {
-                className += " box-full";
-            }
-            var children = this.props.children;
-            if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case VGroup:
-                        case HGroup:
-                            child.props.className += " row-fill";
-                            break;
-                        case layout_1.Header:
-                        case layout_1.Footer:
-                            child.type = VShrink;
-                            break;
-                    }
-                }
-            }
-            var style = {};
-            var height = this.props.height;
-            if (height) {
-                style.height = height + "px";
-            }
-            return React.createElement("div", { className: className, style: style }, children);
-        };
-        VGroup.defaultProps = {
-            className: ""
-        };
-        return VGroup;
-    }(React.Component));
-    exports.VGroup = VGroup;
-    var Sider = /** @class */ (function (_super) {
-        __extends(Sider, _super);
-        function Sider() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        Sider.prototype.render = function () {
-            var style;
-            if (this.props.width) {
-                style = { width: this.props.width + "px" };
-            }
-            return React.createElement("div", { className: "col-sider " + this.props.className, style: style }, this.props.children);
-        };
-        Sider.defaultProps = {
-            className: ""
-        };
-        return Sider;
-    }(React.Component));
-    exports.Sider = Sider;
-    var HContent = /** @class */ (function (_super) {
-        __extends(HContent, _super);
-        function HContent() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        HContent.prototype.render = function () {
-            return React.createElement("div", { className: "row-center " + this.props.className }, this.props.children);
-        };
-        HContent.defaultProps = {
-            className: ""
-        };
-        return HContent;
-    }(React.Component));
-    exports.HContent = HContent;
-    var HGroup = /** @class */ (function (_super) {
-        __extends(HGroup, _super);
-        function HGroup() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        HGroup.prototype.render = function () {
-            var className = this.props.className + " row-flex";
-            if (!this.props.height) {
-                className += " box-full";
-            }
-            var children = this.props.children;
-            if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case VGroup:
-                        case HGroup:
-                            child.props.className += " col-center";
-                    }
-                }
-            }
-            var style = {};
-            var height = this.props.height;
-            if (height) {
-                style.height = height + "px";
-            }
-            return React.createElement("div", { className: className, style: style }, children);
-        };
-        HGroup.defaultProps = {
-            className: ""
-        };
-        return HGroup;
-    }(React.Component));
-    exports.HGroup = HGroup;
 });
