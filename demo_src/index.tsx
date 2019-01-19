@@ -5,17 +5,16 @@ import {Fragment} from "react";
 import {Link,Route,HashRouter,Layout,Header,Content,Sider} from "ting";
 
 export=()=>
-<Layout full>
-	<Header>
+<Layout>
+	<Header className="box-mblg">
 		<PageHeader></PageHeader>
 	</Header>
-	<Header height={20}></Header>
 	<Layout className="container-fluid">
 		<Sider width={250}>
 			<Sidebar></Sidebar>
 		</Sider>
 		<Sider width={20}></Sider>
-		<Content className="box-pllg">
+		<Content>
 			<HashRouter>
 				<Route exact>
 					<article>

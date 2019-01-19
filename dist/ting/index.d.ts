@@ -88,74 +88,81 @@ declare module "ting/router" {
 }
 declare module "ting/layout" {
     import * as React from "react";
-    export interface HChildProps {
-        width: number;
+    export var supportFlex: boolean;
+    export var isQuirks: boolean;
+    export const enum POSITION {
+        LEFT = 0,
+        RIGHT = 1,
+        TOP = 2,
+        BUTTON = 3
+    }
+    export const enum DIRCTION {
+        H = 1,
+        V = 2
+    }
+    export const enum LAYOUT {
+        FLEX = 1,
+        TABLE = 2,
+        NONE = 0
+    }
+    export interface ContentProps {
         className?: string;
     }
-    export interface VChildProps {
+    export interface SiderProps {
+        width?: number;
+        className?: string;
+    }
+    export interface VShrinkProps {
         height?: number;
         className?: string;
     }
     export interface LayoutProps {
-        full?: boolean;
         height?: number | string;
         className?: string;
-        dirction?: number;
     }
-    export interface LayoutStates {
-    }
-    export class Layout extends React.Component<LayoutProps, LayoutStates> {
+    export class Layout extends React.Component<LayoutProps, {}> {
+        static defaultProps: {
+            className: string;
+        };
         render(): JSX.Element;
     }
-    export class VGroup extends React.Component<LayoutProps, LayoutStates> {
+    export class VGroup extends React.Component<LayoutProps, {}> {
         static defaultProps: {
             className: string;
         };
-        renderTable(): JSX.Element | {
-            children: React.ReactNode;
-        };
-        renderFlex(): JSX.Element;
-        render(): JSX.Element | {
-            children: React.ReactNode;
-        };
-    }
-    export class HGroup extends React.Component<LayoutProps, LayoutStates> {
-        static defaultProps: {
-            className: string;
-        };
-        renderTable(): JSX.Element | {
-            children: React.ReactNode;
-        };
-        renderFlex(): JSX.Element;
-        render(): JSX.Element | {
-            children: React.ReactNode;
-        };
-    }
-    export class Header extends React.Component<VChildProps, any> {
-        static defaultProps: {
-            className: string;
-        };
-        renderTable(): JSX.Element;
-        renderFlex(): JSX.Element;
         render(): JSX.Element;
+        renderFlex(): JSX.Element;
+        renderTableQuirks(): JSX.Element;
+        renderDiv(): JSX.Element;
     }
-    export class Sider extends React.Component<HChildProps, any> {
+    export class HGroup extends React.Component<LayoutProps, {}> {
         static defaultProps: {
             className: string;
         };
+        render(): JSX.Element;
+        renderFlex(): JSX.Element;
         renderTableQuirks(): JSX.Element;
         renderTable(): JSX.Element;
-        renderFlex(): JSX.Element;
-        render(): JSX.Element;
     }
-    export class Content extends React.Component<LayoutProps, any> {
-        constructor(props: any, context: any);
-        renderTable(): JSX.Element;
-        renderTableQuirks(): JSX.Element;
-        renderFlex(): JSX.Element;
-        render(): JSX.Element;
+    export class Header extends React.Component<VShrinkProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): React.ReactNode;
     }
     export var Footer: typeof Header;
+    export class Sider extends React.Component<SiderProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): React.ReactNode;
+    }
+    export class Content extends React.Component<ContentProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): React.ReactNode;
+    }
 }
 declare module "ting" {
     import * as button from "ting/button";
@@ -163,13 +170,18 @@ declare module "ting" {
     import * as loader from "ting/router";
     import * as layout from "ting/layout";
     const _default: {
+        supportFlex: boolean;
+        isQuirks: boolean;
+        POSITION: typeof layout.POSITION;
+        DIRCTION: typeof layout.DIRCTION;
+        LAYOUT: typeof layout.LAYOUT;
         Layout: typeof layout.Layout;
         VGroup: typeof layout.VGroup;
         HGroup: typeof layout.HGroup;
         Header: typeof layout.Header;
+        Footer: typeof layout.Header;
         Sider: typeof layout.Sider;
         Content: typeof layout.Content;
-        Footer: typeof layout.Header;
         navigate(path: any): void;
         linkClickHandle(e: any): void;
         HashRouter: typeof loader.HashRouter;
@@ -181,4 +193,44 @@ declare module "ting" {
         ButtonToolbar: typeof button.ButtonToolbar;
     };
     export = _default;
+}
+declare module "ting/layout-flex" {
+    import * as React from "react";
+    import { VShrinkProps, ContentProps, SiderProps, LayoutProps } from "ting/layout";
+    export class VShrink extends React.Component<VShrinkProps, {}> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
+    export class VContent extends React.Component<ContentProps, {}> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
+    export class VGroup extends React.Component<LayoutProps, {}> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
+    export class Sider extends React.Component<SiderProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
+    export class HContent extends React.Component<ContentProps, any> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
+    export class HGroup extends React.Component<LayoutProps, {}> {
+        static defaultProps: {
+            className: string;
+        };
+        render(): JSX.Element;
+    }
 }

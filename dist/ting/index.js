@@ -362,6 +362,12 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
 define("ting/layout", ["require", "exports", "react"], function (require, exports, React) {
     "use strict";
     exports.__esModule = true;
+    var style = document.head.style;
+    exports.supportFlex = "order" in style || "msFlexOrder" in style || "webkitBoxOrdinalGroup" in style; // || "MozBoxOrdinalGroup" in style;
+    exports.isQuirks = Sky.browser.quirks;
+    ;
+    ;
+    ;
     ;
     var Layout = /** @class */ (function (_super) {
         __extends(Layout, _super);
@@ -371,18 +377,24 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
         Layout.prototype.render = function () {
             var children = this.props.children;
             if (Array.isArray(children)) {
+                var dir;
                 var i = children.length;
                 while (i-- > 0) {
                     var child = children[i];
-                    if (child.type == Header) {
+                    if (child.type == Header || child.type == exports.Footer) {
+                        dir = 2 /* V */;
                         return React.createElement(VGroup, __assign({}, this.props), this.props.children);
                     }
                     else if (child.type == Sider) {
+                        dir = 1 /* H */;
                         return React.createElement(HGroup, __assign({}, this.props), this.props.children);
                     }
                 }
             }
-            return null;
+            return React.createElement("div", null, children);
+        };
+        Layout.defaultProps = {
+            className: ""
         };
         return Layout;
     }(React.Component));
@@ -392,81 +404,73 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
         function VGroup() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        VGroup.prototype.renderTable = function () {
-            var className = this.props.className;
-            if (this.props.full) {
-                className += " box-full";
-            }
-            var children = this.props.children;
-            if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case Layout:
-                        case VGroup:
-                        case HGroup:
-                        case Content:
-                            child.props.dirction = 2;
-                    }
+        VGroup.prototype.render = function () {
+            if (this.props.height != "auto") {
+                if (exports.supportFlex) {
+                    return this.renderFlex();
+                }
+                else if (exports.isQuirks) {
+                    return this.renderTableQuirks();
                 }
             }
-            switch (this.props.dirction) {
-                case 1:
-                    return React.createElement("td", { className: className + " layout-cell" },
-                        React.createElement("table", { className: "layout-table", width: "100%", height: "100%" },
-                            React.createElement("tbody", null, children)));
-                case 2:
-                    return { children: children };
-                default:
-                    return React.createElement("table", { className: className + " row-fill layout-table", width: "100%", height: this.props.height },
-                        React.createElement("tbody", null, children));
-            }
+            return this.renderDiv();
         };
         VGroup.prototype.renderFlex = function () {
             var className = this.props.className + " col-flex";
-            if (this.props.full) {
-                className += " box-full";
-            }
-            else {
-                className += " flex";
-            }
             var children = this.props.children;
             if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case Layout:
-                        case VGroup:
-                        case HGroup:
-                        case Content:
-                            child.props.dirction = 2;
-                    }
-                }
-            }
-            switch (this.props.dirction) {
-                case 1:
-                    className += " row-center";
-                    break;
-                case 2:
-                    className += " row-fill";
-                    break;
+                children = children.map(childrenToFlexV, this);
             }
             var style = {};
             var height = this.props.height;
             if (height) {
-                if (typeof height !== "number")
-                    height = height + "px";
-                style.height = height;
+                if (isNaN(height)) {
+                    style.height = height;
+                }
+                else {
+                    style.height = height + "px";
+                }
+            }
+            else {
+                className += " layout-full";
             }
             return React.createElement("div", { className: className, style: style }, children);
         };
-        VGroup.prototype.render = function () {
-            if (!Sky.browser.quirks) {
-                return this.renderFlex();
+        VGroup.prototype.renderTableQuirks = function () {
+            var children = this.props.children;
+            var height = this.props.height;
+            if (!height) {
+                height = "100%";
             }
-            return this.renderTable();
+            var tableProps = {
+                width: "100%", height: height,
+                border: 0, cellSpacing: 0, cellPadding: 0,
+                className: this.props.className
+            };
+            if (Array.isArray(children)) {
+                return React.createElement("table", tableProps, React.createElement("tbody", null, children.map(childrenToTrQuirks, this)));
+            }
+            else {
+                return React.createElement("div", null, children);
+            }
+        };
+        VGroup.prototype.renderDiv = function () {
+            var className = this.props.className;
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                children = children.map(childrenToDivV, this);
+            }
+            var style = {};
+            var height = this.props.height;
+            if (height) {
+                if (isNaN(height)) {
+                    style.height = height;
+                }
+                else {
+                    style.height = height + "px";
+                }
+            }
+            return React.createElement("div", { className: className, style: style }, children);
         };
         VGroup.defaultProps = {
             className: ""
@@ -479,96 +483,69 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
         function HGroup() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        HGroup.prototype.renderTable = function () {
-            var className = this.props.className;
-            if (this.props.full) {
-                className += " box-full";
+        HGroup.prototype.render = function () {
+            if (exports.supportFlex) {
+                return this.renderFlex();
             }
-            else {
-                className += " flex";
-            }
-            var children = this.props.children;
-            if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case Layout:
-                        case VGroup:
-                        case HGroup:
-                        case Content:
-                            child.props.dirction = 1;
-                    }
+            else if (exports.isQuirks) {
+                if (this.props.height != "auto") {
+                    return this.renderTableQuirks();
                 }
             }
-            switch (this.props.dirction) {
-                case 1:
-                    return { children: children };
-                case 2:
-                    if (!Sky.browser.quirks) {
-                        return React.createElement("div", { className: className + " row-fill" },
-                            React.createElement("table", { className: "layout-table", width: "100%" },
-                                React.createElement("tbody", null,
-                                    React.createElement("tr", null, children))));
-                    }
-                    else {
-                        return React.createElement("tr", null,
-                            React.createElement("td", { className: className + " layout-cell", height: "100%" },
-                                React.createElement("div", { className: "box-full" },
-                                    React.createElement("table", { className: "layout-table", width: "100%", height: "100%" },
-                                        React.createElement("tbody", null,
-                                            React.createElement("tr", null, children))))));
-                    }
-                default:
-                    return React.createElement("table", { className: className + " layout-table", height: this.props.height },
-                        React.createElement("tbody", null,
-                            React.createElement("tr", null, children)));
-            }
+            return this.renderTable();
         };
         HGroup.prototype.renderFlex = function () {
             var className = this.props.className + " row-flex";
-            if (this.props.full) {
-                className += " box-full";
-            }
-            else {
-                className += " flex";
-            }
             var children = this.props.children;
             if (Array.isArray(children)) {
-                var i = children.length;
-                while (i-- > 0) {
-                    var child = children[i];
-                    switch (child.type) {
-                        case Layout:
-                        case VGroup:
-                        case HGroup:
-                        case Content:
-                            child.props.dirction = 1;
-                    }
+                children = children.map(childrenToFlexH, this);
+            }
+            var height = this.props.height;
+            var style = {};
+            if (height) {
+                if (isNaN(height)) {
+                    style.height = height;
+                }
+                else {
+                    style.height = height + "px";
                 }
             }
-            switch (this.props.dirction) {
-                case 1:
-                    className += " col-center";
-                    break;
-                case 2:
-                    className += " row-fill";
-                    break;
-            }
-            var style = {};
-            var height = this.props.height;
-            if (height) {
-                if (typeof height !== "number")
-                    height = height + "px";
-                style.height = height;
+            else {
+                className += " layout-full";
             }
             return React.createElement("div", { className: className, style: style }, children);
         };
-        HGroup.prototype.render = function () {
-            if ('atob' in window) {
-                return this.renderFlex();
+        HGroup.prototype.renderTableQuirks = function () {
+            var children = this.props.children;
+            var height = this.props.height;
+            if (!height) {
+                height = "100%";
             }
-            return this.renderTable();
+            var tableProps = {
+                width: "100%", height: height,
+                border: 0, cellSpacing: 0, cellPadding: 0,
+                className: "layout-table"
+            };
+            if (Array.isArray(children)) {
+                return React.createElement("table", tableProps, React.createElement("tbody", null, React.createElement("tr", null, children.map(childrenToTdQuirks, this))));
+            }
+            else {
+                return React.createElement("div", null, children);
+            }
+        };
+        HGroup.prototype.renderTable = function () {
+            var children = this.props.children;
+            var tableProps = {
+                width: "100%", height: this.props.height,
+                border: 0, cellSpacing: 0, cellPadding: 0,
+                className: "layout-table"
+            };
+            if (Array.isArray(children)) {
+                return React.createElement("table", tableProps, React.createElement("tbody", null, React.createElement("tr", null, children.map(childrenToTd, this))));
+            }
+            else {
+                return React.createElement("div", null, children);
+            }
         };
         HGroup.defaultProps = {
             className: ""
@@ -576,27 +553,126 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
         return HGroup;
     }(React.Component));
     exports.HGroup = HGroup;
+    function childrenToTrQuirks(child) {
+        switch (child.type) {
+            case Layout:
+            case Content:
+                return React.createElement("tr", null,
+                    React.createElement("td", { height: "100%" },
+                        React.createElement("div", { className: child.props.className + " layout-vfull" }, child)));
+            default:
+                var className = child.props.className;
+                if (child.props.height) {
+                    className += " layout-vfull";
+                }
+                return React.createElement("tr", null,
+                    React.createElement("td", { height: child.props.height },
+                        React.createElement("div", { className: className }, child)));
+        }
+    }
+    function childrenToTdQuirks(child) {
+        switch (child.type) {
+            case Layout:
+                return React.createElement("td", { vAlign: "top", width: "100%" }, child);
+            case Content:
+                return React.createElement("td", { vAlign: "top", width: "100%" },
+                    React.createElement("div", { className: child.props.className + " layout-vfull" }, child));
+            default:
+                var style;
+                if (child.props.width) {
+                    style = {};
+                    if (isNaN(child.props.width)) {
+                        style.width = child.props.width;
+                    }
+                    else {
+                        style.width = child.props.width + "px";
+                    }
+                }
+                return React.createElement("td", { vAlign: "top" },
+                    React.createElement("div", { style: style, className: child.props.className + " layout-vfull" }, child));
+        }
+    }
+    function childrenToTd(child) {
+        switch (child.type) {
+            case Layout:
+                if (this.props.height == "auto") {
+                    child.props.height = "auto";
+                }
+                return React.createElement("td", { vAlign: "top", width: "100%" }, child);
+            case Content:
+                return React.createElement("td", { vAlign: "top", width: "100%", className: child.props.className }, child);
+            default:
+                var style;
+                var className = child.props.className;
+                if (child.props.width) {
+                    style = {};
+                    if (isNaN(child.props.width)) {
+                        style.width = child.props.width;
+                    }
+                    else {
+                        style.width = child.props.width + "px";
+                    }
+                }
+                return React.createElement("td", { vAlign: "top", className: className },
+                    React.createElement("div", { style: style, className: "layout-vfull" }, child));
+        }
+    }
+    function childrenToDivV(child) {
+        switch (child.type) {
+            case Layout:
+                if (this.props.height == "auto") {
+                    child.props.height = "auto";
+                }
+            case Content:
+                return React.createElement("div", { className: child.props.className }, child);
+            default:
+                var style;
+                if (child.props.height) {
+                    style = { height: child.props.height + "px" };
+                }
+                return React.createElement("div", { className: child.props.className, style: style }, child);
+        }
+    }
+    function childrenToFlexV(child) {
+        switch (child.type) {
+            case Layout:
+                child.props.className += " row-fill";
+                return child;
+            case Content:
+                return React.createElement("div", { className: child.props.className + " row-fill" }, child);
+            default:
+                var style;
+                if (child.props.height) {
+                    style = { height: child.props.height + "px" };
+                }
+                return React.createElement("div", { className: child.props.className + " row-fixed", style: style }, child);
+        }
+    }
+    function childrenToFlexH(child) {
+        switch (child.type) {
+            case Layout:
+                if (this.props.height == "auto") {
+                    child.props.height = "auto";
+                }
+                child.props.className += " col-center";
+                return child;
+            case Content:
+                return React.createElement("div", { className: child.props.className + " col-center" }, child);
+            default:
+                var style;
+                if (child.props.width) {
+                    style = { width: child.props.width + "px" };
+                }
+                return React.createElement("div", { className: child.props.className + " col-sider", style: style }, child);
+        }
+    }
     var Header = /** @class */ (function (_super) {
         __extends(Header, _super);
         function Header() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Header.prototype.renderTable = function () {
-            return React.createElement("tr", null,
-                React.createElement("td", { height: this.props.height, className: this.props.className + " layout-cell" }, this.props.children));
-        };
-        Header.prototype.renderFlex = function () {
-            var style;
-            if (this.props.height) {
-                style = { height: this.props.height + "px" };
-            }
-            return React.createElement("div", { className: "row-fixed " + this.props.className, style: style }, this.props.children);
-        };
         Header.prototype.render = function () {
-            if (!Sky.browser.quirks) {
-                return this.renderFlex();
-            }
-            return this.renderTable();
+            return this.props.children;
         };
         Header.defaultProps = {
             className: ""
@@ -604,37 +680,14 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
         return Header;
     }(React.Component));
     exports.Header = Header;
+    exports.Footer = Header;
     var Sider = /** @class */ (function (_super) {
         __extends(Sider, _super);
         function Sider() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Sider.prototype.renderTableQuirks = function () {
-            var width = this.props.width;
-            if (!width) {
-                width = 0;
-            }
-            return React.createElement("td", { width: width, vAlign: "top", className: "layout-cell " + this.props.className },
-                React.createElement("div", { className: "box-full" }, this.props.children));
-        };
-        Sider.prototype.renderTable = function () {
-            return React.createElement("td", { width: this.props.width, vAlign: "top", className: "layout-cell" }, this.props.children);
-        };
-        Sider.prototype.renderFlex = function () {
-            var style;
-            if (this.props.width) {
-                style = { width: this.props.width + "px" };
-            }
-            return React.createElement("div", { className: "col-sider " + this.props.className, style: style }, this.props.children);
-        };
         Sider.prototype.render = function () {
-            if ('atob' in window) {
-                return this.renderFlex();
-            }
-            if (Sky.browser.quirks) {
-                return this.renderTableQuirks();
-            }
-            return this.renderTable();
+            return this.props.children;
         };
         Sider.defaultProps = {
             className: ""
@@ -644,59 +697,163 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
     exports.Sider = Sider;
     var Content = /** @class */ (function (_super) {
         __extends(Content, _super);
-        function Content(props, context) {
-            var _this = this;
-            if (props.className == null) {
-                props.className = "";
-            }
-            _this = _super.call(this, props, context) || this;
-            return _this;
+        function Content() {
+            return _super !== null && _super.apply(this, arguments) || this;
         }
-        Content.prototype.renderTable = function () {
-            return React.createElement("td", { vAlign: "top", className: this.props.className }, this.props.children);
-        };
-        Content.prototype.renderTableQuirks = function () {
-            var className;
-            switch (this.props.dirction) {
-                case 1:
-                    return React.createElement("td", { vAlign: "top", className: "layout-cell" },
-                        React.createElement("div", { className: "box-full " + this.props.className }, this.props.children));
-                case 2:
-                    return React.createElement("tr", null,
-                        React.createElement("td", { vAlign: "top", height: "100%", className: "layout-cell" },
-                            React.createElement("div", { className: "box-full " + this.props.className }, this.props.children)));
-            }
-        };
-        Content.prototype.renderFlex = function () {
-            var className;
-            switch (this.props.dirction) {
-                case 1:
-                    className = "col-center " + this.props.className;
-                    break;
-                case 2:
-                    className = "row-fill " + this.props.className;
-                    break;
-            }
-            return React.createElement("div", { className: className }, this.props.children);
-        };
         Content.prototype.render = function () {
-            if ('atob' in window) {
-                return this.renderFlex();
-            }
-            if (Sky.browser.quirks) {
-                return this.renderTableQuirks();
-            }
-            if (this.props.dirction == 1) {
-                return this.renderTable();
-            }
-            return this.renderFlex();
+            return this.props.children;
+        };
+        Content.defaultProps = {
+            className: ""
         };
         return Content;
     }(React.Component));
     exports.Content = Content;
-    exports.Footer = Header;
 });
 define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button, icon, loader, layout) {
     "use strict";
     return __assign({}, button, icon, loader, layout);
+});
+define("ting/layout-flex", ["require", "exports", "react", "ting/layout"], function (require, exports, React, layout_1) {
+    "use strict";
+    exports.__esModule = true;
+    var VShrink = /** @class */ (function (_super) {
+        __extends(VShrink, _super);
+        function VShrink() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        VShrink.prototype.render = function () {
+            var style;
+            if (this.props.height) {
+                style = { height: this.props.height + "px" };
+            }
+            return React.createElement("div", { className: "row-fixed " + this.props.className, style: style }, this.props.children);
+        };
+        VShrink.defaultProps = {
+            className: ""
+        };
+        return VShrink;
+    }(React.Component));
+    exports.VShrink = VShrink;
+    var VContent = /** @class */ (function (_super) {
+        __extends(VContent, _super);
+        function VContent() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        VContent.prototype.render = function () {
+            return React.createElement("div", { className: "row-fill " + this.props.className }, this.props.children);
+        };
+        VContent.defaultProps = {
+            className: ""
+        };
+        return VContent;
+    }(React.Component));
+    exports.VContent = VContent;
+    var VGroup = /** @class */ (function (_super) {
+        __extends(VGroup, _super);
+        function VGroup() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        VGroup.prototype.render = function () {
+            var className = this.props.className + " col-flex";
+            if (!this.props.height) {
+                className += " box-full";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case VGroup:
+                        case HGroup:
+                            child.props.className += " row-fill";
+                            break;
+                        case layout_1.Header:
+                        case layout_1.Footer:
+                            child.type = VShrink;
+                            break;
+                    }
+                }
+            }
+            var style = {};
+            var height = this.props.height;
+            if (height) {
+                style.height = height + "px";
+            }
+            return React.createElement("div", { className: className, style: style }, children);
+        };
+        VGroup.defaultProps = {
+            className: ""
+        };
+        return VGroup;
+    }(React.Component));
+    exports.VGroup = VGroup;
+    var Sider = /** @class */ (function (_super) {
+        __extends(Sider, _super);
+        function Sider() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Sider.prototype.render = function () {
+            var style;
+            if (this.props.width) {
+                style = { width: this.props.width + "px" };
+            }
+            return React.createElement("div", { className: "col-sider " + this.props.className, style: style }, this.props.children);
+        };
+        Sider.defaultProps = {
+            className: ""
+        };
+        return Sider;
+    }(React.Component));
+    exports.Sider = Sider;
+    var HContent = /** @class */ (function (_super) {
+        __extends(HContent, _super);
+        function HContent() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        HContent.prototype.render = function () {
+            return React.createElement("div", { className: "row-center " + this.props.className }, this.props.children);
+        };
+        HContent.defaultProps = {
+            className: ""
+        };
+        return HContent;
+    }(React.Component));
+    exports.HContent = HContent;
+    var HGroup = /** @class */ (function (_super) {
+        __extends(HGroup, _super);
+        function HGroup() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        HGroup.prototype.render = function () {
+            var className = this.props.className + " row-flex";
+            if (!this.props.height) {
+                className += " box-full";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                var i = children.length;
+                while (i-- > 0) {
+                    var child = children[i];
+                    switch (child.type) {
+                        case VGroup:
+                        case HGroup:
+                            child.props.className += " col-center";
+                    }
+                }
+            }
+            var style = {};
+            var height = this.props.height;
+            if (height) {
+                style.height = height + "px";
+            }
+            return React.createElement("div", { className: className, style: style }, children);
+        };
+        HGroup.defaultProps = {
+            className: ""
+        };
+        return HGroup;
+    }(React.Component));
+    exports.HGroup = HGroup;
 });

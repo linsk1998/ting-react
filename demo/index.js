@@ -137,15 +137,14 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
         return Sidebar;
     }(React.Component));
     return function () {
-        return React.createElement(ting_1.Layout, { full: true },
-            React.createElement(ting_1.Header, null,
+        return React.createElement(ting_1.Layout, null,
+            React.createElement(ting_1.Header, { className: "box-mblg" },
                 React.createElement(PageHeader, null)),
-            React.createElement(ting_1.Header, { height: 20 }),
             React.createElement(ting_1.Layout, { className: "container-fluid" },
                 React.createElement(ting_1.Sider, { width: 250 },
                     React.createElement(Sidebar, null)),
                 React.createElement(ting_1.Sider, { width: 20 }),
-                React.createElement(ting_1.Content, { className: "box-pllg" },
+                React.createElement(ting_1.Content, null,
                     React.createElement(ting_1.HashRouter, null,
                         React.createElement(ting_1.Route, { exact: true },
                             React.createElement("article", null,
