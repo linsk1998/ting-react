@@ -122,6 +122,9 @@ declare namespace Sky{
 	function setFormData(form:HTMLFormElement,data:object);
 	function destroy(ele:HTMLElement):void;
 
+	function pick(obj:object,keys:string[]):any;
+	function omit(obj:object,keys:string[]):any;
+
 	function getElementsByClassName(className:string,parent?:HTMLElement):Array<HTMLElement>;
 	function matchesSelector(ele:HTMLElement,selector:string,ancestor?:HTMLElement):boolean;
 	function querySelector(selector:string,ancestor?:HTMLElement):Array<HTMLElement>;

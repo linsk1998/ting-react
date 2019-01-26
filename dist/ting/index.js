@@ -26,72 +26,6 @@
     Sky.support.html5Styles = html5Styles;
     Sky.support.unknownElements = unknownElements;
 }());
-define("ting/button", ["require", "exports", "react", "react"], function (require, exports, react_1, React) {
-    "use strict";
-    exports.__esModule = true;
-    ;
-    var Button = /** @class */ (function (_super) {
-        __extends(Button, _super);
-        function Button() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        Button.prototype.renderAnchor = function (className, rest) {
-            return React.createElement("a", __assign({ className: className }, rest), this.props.children);
-        };
-        Button.prototype.renderButton = function (className, rest) {
-            return React.createElement("button", __assign({ type: "button", className: className }, rest), this.props.children);
-        };
-        Button.prototype.render = function () {
-            var _a = this.props, type = _a.type, block = _a.block, size = _a.size, rest = __rest(_a, ["type", "block", "size"]);
-            var className = "btn";
-            if (type) {
-                className += " btn-" + type;
-            }
-            else {
-                className += " btn-default";
-            }
-            if (block) {
-                className += " btn-block";
-            }
-            if (size) {
-                className += " btn-" + size;
-            }
-            if (this.props.disabled) {
-                className += " btn-disabled";
-            }
-            if (rest.href) {
-                return this.renderAnchor(className, rest);
-            }
-            else {
-                return this.renderButton(className, rest);
-            }
-        };
-        return Button;
-    }(react_1.Component));
-    exports.Button = Button;
-    var ButtonGroup = /** @class */ (function (_super) {
-        __extends(ButtonGroup, _super);
-        function ButtonGroup() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ButtonGroup.prototype.render = function () {
-            return React.createElement("div", { className: "btn-group" }, this.props.children);
-        };
-        return ButtonGroup;
-    }(react_1.Component));
-    exports.ButtonGroup = ButtonGroup;
-    var ButtonToolbar = /** @class */ (function (_super) {
-        __extends(ButtonToolbar, _super);
-        function ButtonToolbar() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        ButtonToolbar.prototype.render = function () {
-            return React.createElement("div", { className: "btn-toolbar" }, this.props.children);
-        };
-        return ButtonToolbar;
-    }(react_1.Component));
-    exports.ButtonToolbar = ButtonToolbar;
-});
 define("support/apng-supported-plugin", [], function () {
     return {
         load: function (path, require, resolve) {
@@ -151,7 +85,7 @@ define("support/webp-animation-supported", ["require", "exports", "support/webp-
     exports.__esModule = true;
     exports["default"] = webp_animation_supported_plugin_1["default"];
 });
-define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported"], function (require, exports, react_2, React, apng_supported_1, webp_animation_supported_1) {
+define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported"], function (require, exports, react_1, React, apng_supported_1, webp_animation_supported_1) {
     "use strict";
     exports.__esModule = true;
     ;
@@ -234,7 +168,7 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
             return null;
         };
         return Icon;
-    }(react_2.Component));
+    }(react_1.Component));
     exports.Icon = Icon;
     function toCodePoint(unicodeSurrogates) {
         var r = [], c = 0, p = 0, i = 0;
@@ -253,6 +187,123 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
         }
         return r.join("-");
     }
+});
+define("ting/utils", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    function bindComponentEvent(component, callback) {
+        return function (e) {
+            callback.call(this, e, component);
+        };
+    }
+    exports.bindComponentEvent = bindComponentEvent;
+});
+define("ting/button", ["require", "exports", "ting/icon", "ting/utils", "react", "react"], function (require, exports, icon_1, utils_1, react_2, React) {
+    "use strict";
+    exports.__esModule = true;
+    ;
+    var Button = /** @class */ (function (_super) {
+        __extends(Button, _super);
+        function Button(props, context) {
+            var _this = _super.call(this, props, context) || this;
+            _this.state = Sky.pick(props, ['href', 'theme', 'disabled', 'block', 'size']);
+            return _this;
+        }
+        Button.prototype.renderAnchor = function (className, rest) {
+            var children = this.props.children;
+            if (!rest.href) {
+                rest.href = "javascript:void 0";
+            }
+            if (this.props.icon) {
+                className += " btn-multiple";
+                children = btnIconChildren(this.props.icon, this.state.size, children);
+            }
+            return React.createElement("a", __assign({ className: className }, rest), children);
+        };
+        Button.prototype.renderButton = function (className, rest) {
+            var children = this.props.children;
+            if (this.props.icon) {
+                className += " btn-multiple";
+                children = btnIconChildren(this.props.icon, this.state.size, children);
+            }
+            return React.createElement("button", __assign({ type: "button", className: className }, rest), children);
+        };
+        Button.prototype.render = function () {
+            var attrs = Sky.omit(this.props, ['block', 'size', 'theme']);
+            attrs.href = this.state.href;
+            attrs.disabled = this.state.disabled;
+            var _a = this.state, href = _a.href, theme = _a.theme, disabled = _a.disabled, block = _a.block, size = _a.size;
+            var className = "btn";
+            if (theme) {
+                className += " btn-" + theme;
+            }
+            else {
+                className += " btn-default";
+            }
+            if (block) {
+                className += " btn-block";
+            }
+            if (size) {
+                className += " btn-" + size;
+            }
+            if (disabled) {
+                className += " btn-disabled";
+            }
+            for (var key in attrs) {
+                if (key.startsWith("on")) {
+                    attrs[key] = utils_1.bindComponentEvent(this, attrs[key]);
+                }
+            }
+            switch (attrs.type) {
+                case "button":
+                case "submit":
+                    return this.renderButton(className, attrs);
+                default:
+                    return this.renderAnchor(className, attrs);
+            }
+        };
+        return Button;
+    }(react_2.Component));
+    exports.Button = Button;
+    function btnIconChildren(icon, btnSize, children) {
+        var size;
+        switch (btnSize) {
+            case "lg":
+                size = 20;
+                break;
+            case "sm":
+                size = 14;
+            case "xs":
+                size = 12;
+            default:
+                size = 16;
+        }
+        return React.createElement(React.Fragment, null,
+            React.createElement(icon_1.Icon, { size: size }, icon),
+            React.createElement("span", { className: "btn-label" }, children));
+    }
+    var ButtonGroup = /** @class */ (function (_super) {
+        __extends(ButtonGroup, _super);
+        function ButtonGroup() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ButtonGroup.prototype.render = function () {
+            return React.createElement("div", { className: "btn-group" }, this.props.children);
+        };
+        return ButtonGroup;
+    }(react_2.Component));
+    exports.ButtonGroup = ButtonGroup;
+    var ButtonToolbar = /** @class */ (function (_super) {
+        __extends(ButtonToolbar, _super);
+        function ButtonToolbar() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ButtonToolbar.prototype.render = function () {
+            return React.createElement("div", { className: "btn-toolbar" }, this.props.children);
+        };
+        return ButtonToolbar;
+    }(react_2.Component));
+    exports.ButtonToolbar = ButtonToolbar;
 });
 define("ting/router", ["require", "exports", "react", "react"], function (require, exports, react_3, React) {
     "use strict";
@@ -724,7 +775,14 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
     }(React.Component));
     exports.Content = Content;
 });
-define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button, icon, loader, layout) {
+define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button_1, icon_2, router_1, layout_1) {
     "use strict";
-    return __assign({}, button, icon, loader, layout);
+    function __export(m) {
+        for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+    }
+    exports.__esModule = true;
+    __export(button_1);
+    __export(icon_2);
+    __export(router_1);
+    __export(layout_1);
 });

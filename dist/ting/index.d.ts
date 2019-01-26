@@ -1,29 +1,4 @@
 /// <reference types="react" />
-declare module "ting/button" {
-    import { Component } from "react";
-    import * as React from "react";
-    export interface ButtonProps {
-        type?: string;
-        disabled?: boolean;
-        block?: boolean;
-        size?: string;
-        onClick?: React.MouseEventHandler<HTMLButtonElement>;
-        [key: string]: any;
-    }
-    export interface ButtonStates {
-    }
-    export class Button extends Component<ButtonProps, ButtonStates> {
-        renderAnchor(className: string, rest: object): JSX.Element;
-        renderButton(className: string, rest: object): JSX.Element;
-        render(): JSX.Element;
-    }
-    export class ButtonGroup extends Component {
-        render(): JSX.Element;
-    }
-    export class ButtonToolbar extends Component {
-        render(): JSX.Element;
-    }
-}
 declare module "support/apng-supported-plugin!" {
     const _default: true;
     export default _default;
@@ -59,6 +34,36 @@ declare module "ting/icon" {
         renderEmoji(size: any, children: any, rest: any): JSX.Element;
         renderImg(size: number, src: string, rest: any): JSX.Element;
         renderPng32(size: number, src: string, rest: any): JSX.Element;
+        render(): JSX.Element;
+    }
+}
+declare module "ting/utils" {
+    export function bindComponentEvent(component: any, callback: any): (e: any) => void;
+}
+declare module "ting/button" {
+    import { Component } from "react";
+    export interface ButtonProps extends ButtonStates {
+        type?: "button" | "submit";
+        onClick?: (e?: MouseEvent, btn?: Button) => boolean | void;
+        [key: string]: any;
+    }
+    export interface ButtonStates {
+        href?: string;
+        theme?: "default" | "primary" | "success" | "info" | "warning" | "danger";
+        disabled?: boolean;
+        block?: boolean;
+        size?: "xs" | "sm" | "lg";
+    }
+    export class Button extends Component<ButtonProps, ButtonStates> {
+        constructor(props: any, context: any);
+        renderAnchor(className: string, rest: any): JSX.Element;
+        renderButton(className: string, rest: object): JSX.Element;
+        render(): JSX.Element;
+    }
+    export class ButtonGroup extends Component {
+        render(): JSX.Element;
+    }
+    export class ButtonToolbar extends Component {
         render(): JSX.Element;
     }
 }
@@ -173,32 +178,8 @@ declare module "ting/layout" {
     }
 }
 declare module "ting" {
-    import * as button from "ting/button";
-    import * as icon from "ting/icon";
-    import * as loader from "ting/router";
-    import * as layout from "ting/layout";
-    const _default: {
-        supportFlex: boolean;
-        isQuirks: boolean;
-        POSITION: typeof layout.POSITION;
-        DIRCTION: typeof layout.DIRCTION;
-        LAYOUT: typeof layout.LAYOUT;
-        Layout: typeof layout.Layout;
-        VGroup: typeof layout.VGroup;
-        HGroup: typeof layout.HGroup;
-        Header: typeof layout.Header;
-        Footer: typeof layout.Header;
-        Sider: typeof layout.Sider;
-        Content: typeof layout.Content;
-        navigate(path: any): void;
-        linkClickHandle(e: any): void;
-        HashRouter: typeof loader.HashRouter;
-        Route: typeof loader.Route;
-        Link: typeof loader.Link;
-        Icon: typeof icon.Icon;
-        Button: typeof button.Button;
-        ButtonGroup: typeof button.ButtonGroup;
-        ButtonToolbar: typeof button.ButtonToolbar;
-    };
-    export = _default;
+    export * from "ting/button";
+    export * from "ting/icon";
+    export * from "ting/router";
+    export * from "ting/layout";
 }

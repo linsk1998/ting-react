@@ -1,12 +1,5 @@
 
-import * as button from "ting/button";
-import * as icon from "ting/icon";
-import * as loader from "ting/router";
-import * as layout from "ting/layout";
-
-export={
-	...button,
-	...icon,
-	...loader,
-	...layout
-};
+export * from "ting/button";
+export * from "ting/icon";
+export * from "ting/router";
+export * from "ting/layout";

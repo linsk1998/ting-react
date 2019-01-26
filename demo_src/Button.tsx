@@ -1,26 +1,28 @@
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {Button,ButtonGroup,ButtonToolbar} from "ting";
+import {Button,ButtonGroup,ButtonToolbar,Icon} from "ting";
 
 var btnStyle={ marginRight:"10px"};
 export=()=><article>
 	<h2>普通按钮</h2>
-	<Button style={btnStyle} type="primary" onClick={function(e){ alert("你点击了按钮");}}>Primary</Button>
-	<Button style={btnStyle}>hello</Button>
-	<Button style={btnStyle} type="info">Info</Button>
-	<Button style={btnStyle} type="warning">Warning</Button>
-	<Button style={btnStyle} type="danger">Danger</Button>
+	<Button style={btnStyle} theme="primary" type="button" onClick={function(e,btn){ alert("你点击了按钮");btn.setState({disabled:true})}}>Primary</Button>
+	<Button style={btnStyle} type="button">Default</Button>
+	<Button style={btnStyle} theme="success" type="button">Success</Button>
+	<Button style={btnStyle} theme="info" type="button">Info</Button>
+	<Button style={btnStyle} theme="warning" type="button">Warning</Button>
+	<Button style={btnStyle} theme="danger" type="button">Danger</Button>
 	<h2>超级链接</h2>
-	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" type="primary" title="超级链接">Primary</Button>
-	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank">hello</Button>
-	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" type="info">Info</Button>
-	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" type="warning">Warning</Button>
-	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" type="danger">Danger</Button>
+	<Button style={btnStyle} theme="primary" title="超级链接">Primary</Button>
+	<Button style={btnStyle}>Default</Button>
+	<Button style={btnStyle} theme="success">Success</Button>
+	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" theme="info">Info</Button>
+	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" theme="warning">Warning</Button>
+	<Button style={btnStyle} href="/linsk1998/ting/master/" target="_blank" theme="danger">Danger</Button>
 	<h2>按钮禁用</h2>
-	<Button type="primary" disabled>Primary</Button>
+	<Button theme="primary" disabled>Primary</Button>
 	<h2>block按钮</h2>
-	<Button href="/linsk1998/ting/master/" target="_blank" type="primary" block style={{marginBottom:'10px'}}>Primary</Button>
+	<Button href="/linsk1998/ting/master/" target="_blank" theme="primary" block style={{marginBottom:'10px'}}>Primary</Button>
 	<Button block>hello</Button>
 	<h2>按钮尺寸</h2>
 	<Button href="javascript:void 0" size="lg">大</Button>
@@ -48,4 +50,10 @@ export=()=><article>
 			<Button>按钮 3</Button>
 		</ButtonGroup>
 	</ButtonToolbar>
+	<h2>结合 Icon</h2>
+	<ButtonToolbar>
+		<Button icon="&#xf013;">设置</Button>
+		<Button icon="⛷" type="button">按钮</Button>
+	</ButtonToolbar>
+	
 </article>;

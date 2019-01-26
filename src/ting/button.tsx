@@ -1,32 +1,56 @@
 
+import {Icon} from "ting/icon";
+import {bindComponentEvent} from "ting/utils";
 import {Component} from "react";
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-export interface ButtonProps{
-	type?:string,
-	disabled?:boolean,
-	block?:boolean,
-	size?:string,
-	onClick?:React.MouseEventHandler<HTMLButtonElement>,
+export interface ButtonProps extends ButtonStates{
+	type?:"button"|"submit",
+	onClick?:(e?:MouseEvent,btn?:Button)=>boolean|void,
 	[key:string]:any
 };
-export interface ButtonStates{}
+export interface ButtonStates{
+	href?:string,
+	theme?:"default"|"primary"|"success"|"info"|"warning"|"danger",
+	disabled?:boolean,
+	block?:boolean,
+	size?:"xs"|"sm"|"lg"
+}
 
 export class Button extends Component <ButtonProps,ButtonStates>{
-
-	renderAnchor(className:string,rest:object){
-		return <a className={className} {...rest}>{this.props.children}</a>;
+	constructor(props,context){
+		super(props,context);
+		this.state=Sky.pick(props, ['href','theme','disabled','block','size']);
+	}
+	renderAnchor(className:string,rest:any){
+		var children=this.props.children;
+		if(!rest.href){
+			rest.href="javascript:void 0";
+		}
+		if(this.props.icon){
+			className+=" btn-multiple";
+			children=btnIconChildren(this.props.icon,this.state.size,children)
+		}
+		return <a className={className} {...rest}>{children}</a>;
 	}
 	renderButton(className:string,rest:object){
-		return <button type="button" className={className} {...rest}>{this.props.children}</button>;
+		var children=this.props.children;
+		if(this.props.icon){
+			className+=" btn-multiple";
+			children=btnIconChildren(this.props.icon,this.state.size,children)
+		}
+		return <button type="button" className={className} {...rest}>{children}</button>;
 	}
 	render(){
-		var {type,block,size,...rest}=this.props;
+		var attrs=Sky.omit(this.props,['block','size','theme']);
+		attrs.href=this.state.href;
+		attrs.disabled=this.state.disabled;
+		var {href,theme,disabled,block,size}=this.state;
 		var className="btn"
-		if(type){
-			className+=" btn-"+type;
+		if(theme){
+			className+=" btn-"+theme;
 		}else{
 			className+=" btn-default";
 		}
@@ -36,15 +60,40 @@ export class Button extends Component <ButtonProps,ButtonStates>{
 		if(size){
 			className+=" btn-"+size;
 		}
-		if(this.props.disabled){
+		if(disabled){
 			className+=" btn-disabled";
 		}
-		if(rest.href){
-			return this.renderAnchor(className,rest);
-		}else{
-			return this.renderButton(className,rest);
+		for(var key in attrs){
+			if(key.startsWith("on")){
+				attrs[key]=bindComponentEvent(this,attrs[key]);
+			}
+		}
+		switch(attrs.type){
+			case "button":
+			case "submit":
+				return this.renderButton(className,attrs);
+			default:
+				return this.renderAnchor(className,attrs);
 		}
 	}
+}
+function btnIconChildren(icon,btnSize,children){
+	var size;
+	switch(btnSize){
+		case "lg":
+		size=20;
+		break;
+		case "sm":
+		size=14;
+		case "xs":
+		size=12;
+		default:
+		size=16;
+	}
+	return <React.Fragment>
+		<Icon size={size}>{icon}</Icon>
+		<span className="btn-label">{children}</span>
+	</React.Fragment>;
 }
 export class ButtonGroup extends Component{
 	render(){
