@@ -305,7 +305,7 @@ define("ting/button", ["require", "exports", "ting/icon", "ting/utils", "react",
     }(react_2.Component));
     exports.ButtonToolbar = ButtonToolbar;
 });
-define("ting/router", ["require", "exports", "react", "react"], function (require, exports, react_3, React) {
+define("ting/router", ["require", "exports", "react", "react", "anu"], function (require, exports, react_3, React, anu) {
     "use strict";
     exports.__esModule = true;
     var RouterContext = React.createContext({
@@ -415,7 +415,7 @@ define("ting/router", ["require", "exports", "react", "react"], function (requir
             }, 100);
         }
         else {
-            Sky.attachEvent(window, 'hashchange', onhashchange);
+            anu.eventSystem.addEvent(window, 'hashchange', onhashchange);
         }
     }
     function detach(path) {
@@ -430,10 +430,6 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
     var style = document.head.style;
     exports.supportFlex = "order" in style || "msFlexOrder" in style || "webkitBoxOrdinalGroup" in style; // || "MozBoxOrdinalGroup" in style;
     exports.isQuirks = Sky.browser.quirks;
-    ;
-    ;
-    ;
-    ;
     var Layout = /** @class */ (function (_super) {
         __extends(Layout, _super);
         function Layout() {

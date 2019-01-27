@@ -6,9 +6,9 @@ var style=document.head.style;
 export var supportFlex:boolean="order" in style || "msFlexOrder" in style || "webkitBoxOrdinalGroup" in style;// || "MozBoxOrdinalGroup" in style;
 export var isQuirks:boolean=Sky.browser.quirks;
 
-export const enum POSITION { LEFT=0, RIGHT=1, TOP=2, BUTTON=3};
-export const enum DIRCTION { H=1, V=2};
-export const enum LAYOUT { FLEX=1, TABLE=2, NONE=0};
+export const enum POSITION { LEFT=0, RIGHT=1, TOP=2, BUTTON=3}
+export const enum DIRCTION { H=1, V=2}
+export const enum LAYOUT { FLEX=1, TABLE=2, NONE=0}
 
 export interface ContentProps{
 	className?:string,
@@ -24,7 +24,7 @@ export interface VShrinkProps{
 export interface LayoutProps{
 	height?:number | string,
 	className?:string
-};
+}
 
 export class Layout extends React.Component<LayoutProps,{}>{
 	static defaultProps = { 

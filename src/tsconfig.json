@@ -13,7 +13,7 @@
 			"dom"
 		],
 		"typeRoots" : ["../typings","../node_modules/@types"],
-		"types" : ["react", "react-dom", "sky-bucket"],
+		"types" : ["react", "react-dom", "sky-bucket","anu"],
 		"module" : "amd",
 		//"rootDir": "./",
 		"outFile": "../dist/ting/index.js",

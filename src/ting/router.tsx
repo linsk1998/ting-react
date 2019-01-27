@@ -2,6 +2,8 @@
 import {Component} from "react";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import * as anu from "anu";
+
 
 var RouterContext=React.createContext({
 	history:"hashHistory",
@@ -102,7 +104,7 @@ if('onhashchange' in window){
 			}
 		},100);
 	}else{
-		Sky.attachEvent(window,'hashchange',onhashchange);
+		anu.eventSystem.addEvent(window,'hashchange',onhashchange);
 	}
 }
 function detach(path){
