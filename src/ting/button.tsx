@@ -10,7 +10,7 @@ export interface ButtonProps extends ButtonStates{
 	type?:"button"|"submit",
 	onClick?:(e?:MouseEvent,btn?:Button)=>boolean|void,
 	[key:string]:any
-};
+}
 export interface ButtonStates{
 	href?:string,
 	theme?:"default"|"primary"|"success"|"info"|"warning"|"danger",
