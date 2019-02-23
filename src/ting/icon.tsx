@@ -5,6 +5,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import apng_supported from "support/apng-supported";
 import webp_animation_supported from "support/webp-animation-supported";
+import svg_img_supported from "support/svg-img";
 
 export interface IProps{
 	size?:number,
@@ -27,10 +28,10 @@ export class Icon extends Component <IProps,IStates>{
 		}
 		return <i className="icon fa" style={style}>{children}</i>;
 	}
-	renderEmoji(size,children,rest){
+	renderEmoji(size,children,rest){console.log(children);
 		var code=toCodePoint(children);
 		var src;
-		if('SVGRect' in window){
+		if(svg_img_supported){
 			src="https://cdn.bootcss.com/twemoji/11.2.0/2/svg/"+code+".svg";
 		}else{
 			src="https://cdn.bootcss.com/twemoji/11.2.0/2/72x72/"+code+".png";
@@ -46,6 +47,9 @@ export class Icon extends Component <IProps,IStates>{
 		};
 		style.height=style.width=size+"px";
 		return <i className="icon" style={style} {...rest}/>;
+	}
+	renderSVG(size:number,src:string,rest){
+		return <embed className="icon" width={size} height={size} src={src} {...rest} type="image/svg+xml"/>;
 	}
 	render(){
 		var {size,children,src,atsvg,svg,apng,awebp,png,hfpsgif,gif,...rest}=this.props;
@@ -65,7 +69,7 @@ export class Icon extends Component <IProps,IStates>{
 				return this.renderImg(size,atsvg,rest);
 			}
 			if(svg && ('SVGRect' in window)){
-				return this.renderImg(size,svg,rest);
+				return this.renderSVG(size,svg,rest);
 			}
 			if(apng && apng_supported){
 				return this.renderImg(size,apng,rest);
@@ -92,7 +96,7 @@ export class Icon extends Component <IProps,IStates>{
 }
 
 
-function toCodePoint(unicodeSurrogates) {
+function toCodePoint(unicodeSurrogates) {console.log(unicodeSurrogates.length);
 	var r = [],
 	c = 0,
 	p = 0,
