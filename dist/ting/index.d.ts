@@ -15,6 +15,14 @@ declare module "support/webp-animation-supported" {
     import supported from "support/webp-animation-supported-plugin!";
     export default supported;
 }
+declare module "support/svg-img-plugin!" {
+    const _default: true;
+    export default _default;
+}
+declare module "support/svg-img" {
+    import supported from "support/svg-img-plugin!";
+    export default supported;
+}
 declare module "ting/icon" {
     import { Component } from "react";
     export interface IProps {
@@ -34,6 +42,7 @@ declare module "ting/icon" {
         renderEmoji(size: any, children: any, rest: any): JSX.Element;
         renderImg(size: number, src: string, rest: any): JSX.Element;
         renderPng32(size: number, src: string, rest: any): JSX.Element;
+        renderSVG(size: number, src: string, rest: any): JSX.Element;
         render(): JSX.Element;
     }
 }
@@ -177,9 +186,46 @@ declare module "ting/layout" {
         render(): React.ReactNode;
     }
 }
+declare module "ting/grid" {
+    import { Component } from "react";
+    import * as React from "react";
+    export interface RowProps {
+        cols?: number;
+        gutter?: number;
+    }
+    export interface ColProps {
+        span?: number;
+    }
+    export class Row extends Component<RowProps, {}> {
+        static defaultProps: {
+            gutter: number;
+            cols: number;
+        };
+        cols: number;
+        constructor(props: any, context: any);
+        render(): JSX.Element;
+        renderFlex(): JSX.Element;
+        renderInlineBlock(): JSX.Element;
+        renderQuirks(): JSX.Element;
+        renderTable(): React.DetailedReactHTMLElement<{
+            width: string;
+            border: number;
+            cellSpacing: number;
+            cellPadding: number;
+            className: string;
+        }, HTMLElement>;
+    }
+    export class Col extends React.Component<ColProps, any> {
+        static defaultProps: {
+            span: number;
+        };
+        render(): React.ReactNode;
+    }
+}
 declare module "ting" {
     export * from "ting/button";
     export * from "ting/icon";
     export * from "ting/router";
     export * from "ting/layout";
+    export * from "ting/grid";
 }

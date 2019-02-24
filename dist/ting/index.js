@@ -85,7 +85,30 @@ define("support/webp-animation-supported", ["require", "exports", "support/webp-
     exports.__esModule = true;
     exports["default"] = webp_animation_supported_plugin_1["default"];
 });
-define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported"], function (require, exports, react_1, React, apng_supported_1, webp_animation_supported_1) {
+define("support/svg-img-plugin", [], function () {
+    return {
+        load: function (path, require, resolve) {
+            var supported = false;
+            if ('SVGRect' in window) {
+                var imgTest = new Image();
+                imgTest.onload = function () {
+                    resolve(true);
+                };
+                imgTest.onerror = function () {
+                    resolve(false);
+                };
+                imgTest.src = "data:image/svg+xml;base64,JTNDc3ZnJTIweG1sbnMlM0QlMjJodHRwJTNBLy93d3cudzMub3JnLzIwMDAvc3ZnJTIyJTIwd2lkdGglM0QlMjI5JTIyJTIwaGVpZ2h0JTNEJTIyOSUyMiUzRSUzQ2NpcmNsZSUyMHIlM0QlMjI0JTIyLyUzRSUzQy9zdmclM0U=";
+            }
+            resolve(false);
+        }
+    };
+});
+define("support/svg-img", ["require", "exports", "support/svg-img-plugin!"], function (require, exports, svg_img_plugin_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports["default"] = svg_img_plugin_1["default"];
+});
+define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported", "support/svg-img"], function (require, exports, react_1, React, apng_supported_1, webp_animation_supported_1, svg_img_1) {
     "use strict";
     exports.__esModule = true;
     ;
@@ -102,9 +125,10 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
             return React.createElement("i", { className: "icon fa", style: style }, children);
         };
         Icon.prototype.renderEmoji = function (size, children, rest) {
+            console.log(children);
             var code = toCodePoint(children);
             var src;
-            if ('SVGRect' in window) {
+            if (svg_img_1["default"]) {
                 src = "https://cdn.bootcss.com/twemoji/11.2.0/2/svg/" + code + ".svg";
             }
             else {
@@ -121,6 +145,9 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
             };
             style.height = style.width = size + "px";
             return React.createElement("i", __assign({ className: "icon", style: style }, rest));
+        };
+        Icon.prototype.renderSVG = function (size, src, rest) {
+            return React.createElement("embed", __assign({ className: "icon", width: size, height: size, src: src }, rest, { type: "image/svg+xml" }));
         };
         Icon.prototype.render = function () {
             var _a = this.props, size = _a.size, children = _a.children, src = _a.src, atsvg = _a.atsvg, svg = _a.svg, apng = _a.apng, awebp = _a.awebp, png = _a.png, hfpsgif = _a.hfpsgif, gif = _a.gif, rest = __rest(_a, ["size", "children", "src", "atsvg", "svg", "apng", "awebp", "png", "hfpsgif", "gif"]);
@@ -142,7 +169,7 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
                     return this.renderImg(size, atsvg, rest);
                 }
                 if (svg && ('SVGRect' in window)) {
-                    return this.renderImg(size, svg, rest);
+                    return this.renderSVG(size, svg, rest);
                 }
                 if (apng && apng_supported_1["default"]) {
                     return this.renderImg(size, apng, rest);
@@ -171,6 +198,7 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
     }(react_1.Component));
     exports.Icon = Icon;
     function toCodePoint(unicodeSurrogates) {
+        console.log(unicodeSurrogates.length);
         var r = [], c = 0, p = 0, i = 0;
         while (i < unicodeSurrogates.length) {
             c = unicodeSurrogates.charCodeAt(i++);
@@ -201,7 +229,6 @@ define("ting/utils", ["require", "exports"], function (require, exports) {
 define("ting/button", ["require", "exports", "ting/icon", "ting/utils", "react", "react"], function (require, exports, icon_1, utils_1, react_2, React) {
     "use strict";
     exports.__esModule = true;
-    ;
     var Button = /** @class */ (function (_super) {
         __extends(Button, _super);
         function Button(props, context) {
@@ -771,7 +798,239 @@ define("ting/layout", ["require", "exports", "react"], function (require, export
     }(React.Component));
     exports.Content = Content;
 });
-define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout"], function (require, exports, button_1, icon_2, router_1, layout_1) {
+define("ting/grid", ["require", "exports", "react", "react"], function (require, exports, react_4, React) {
+    "use strict";
+    exports.__esModule = true;
+    var style = document.head.style;
+    var supportFlexWrap = "flexWrap" in style || "msFlexWrap" in style || "webkitFlexGrow" in style;
+    var Row = /** @class */ (function (_super) {
+        __extends(Row, _super);
+        function Row(props, context) {
+            var _this = _super.call(this, props, context) || this;
+            _this.cols = NaN;
+            return _this;
+        }
+        Row.prototype.render = function () {
+            if (supportFlexWrap) {
+                return this.renderFlex();
+            }
+            else if (Sky.browser.quirks) {
+                return this.renderQuirks();
+            }
+            return this.renderQuirks();
+        };
+        Row.prototype.renderFlex = function () {
+            var style = {};
+            if (this.props.gutter) {
+                style.marginLeft = -this.props.gutter + "px";
+            }
+            var children = this.props.children;
+            if (Array.isArray(children)) {
+                if (isNaN(this.props.cols)) {
+                    this.cols = children.reduce(sumCol, 0);
+                }
+                else {
+                    this.cols = this.props.cols;
+                }
+                children = children.map(childrenToFlex, this);
+            }
+            return React.createElement("div", { className: "flex flex-row flex-wrap", style: style }, children);
+        };
+        Row.prototype.renderInlineBlock = function () {
+            var gutter = this.props.gutter;
+            var children = this.props.children;
+            var rowStyle = null;
+            if (gutter) {
+                rowStyle = {
+                    marginLeft: -gutter + "px"
+                };
+            }
+            var rows = [];
+            if (Array.isArray(children)) {
+                if (isNaN(this.props.cols)) {
+                    this.cols = children.reduce(sumCol, 0);
+                }
+                else {
+                    this.cols = this.props.cols;
+                }
+                var colEle, cols = [];
+                var rowEle = React.createElement("div", { className: "row-nowrap", style: rowStyle }, cols);
+                rows.push(rowEle);
+                var i, curCount = 0;
+                for (i = 0; i < children.length; i++) {
+                    var child = children[i];
+                    var span = child.props.span;
+                    curCount = curCount + span;
+                    var colStyle = {};
+                    if (gutter) {
+                        colStyle.borderLeftWidth = this.props.gutter + "px";
+                    }
+                    colStyle.width = span / this.cols * 100 + "%";
+                    colEle = React.createElement("div", { className: "col-inline", style: colStyle }, child);
+                    cols.push(colEle);
+                    if (curCount + span > this.cols) {
+                        curCount = 0;
+                        cols = new Array();
+                        rowEle = React.createElement("div", { className: "row-nowrap", style: rowStyle }, cols);
+                        rows.push(rowEle);
+                    }
+                }
+            }
+            return React.createElement(React.Fragment, null, rows);
+        };
+        Row.prototype.renderQuirks = function () {
+            var gutter = this.props.gutter;
+            var children = this.props.children;
+            var rows = [];
+            if (Array.isArray(children)) {
+                if (isNaN(this.props.cols)) {
+                    this.cols = children.reduce(sumCol, 0);
+                }
+                else {
+                    this.cols = this.props.cols;
+                }
+                var colEle, cols = [];
+                var rowEle = React.createElement("div", { className: "row-nowrap" }, cols);
+                rows.push(rowEle);
+                var i, curCount = 0;
+                if (gutter) {
+                    var leftWidths = new Array(this.cols), rightWidths = new Array(this.cols);
+                    var avg = gutter * (this.cols - 1) / this.cols;
+                    leftWidths[0] = 0;
+                    for (i = 0; i < this.cols; i++) {
+                        if (i > 0) {
+                            leftWidths[i] = timeRound(gutter - rightWidths[i - 1], i);
+                        }
+                        rightWidths[i] = timeRound(avg - leftWidths[i], i);
+                    }
+                }
+                for (i = 0; i < children.length; i++) {
+                    var child = children[i];
+                    var span = child.props.span;
+                    var colStyle = {};
+                    if (gutter) {
+                        colStyle.borderLeftWidth = leftWidths[curCount] + "px";
+                        colStyle.borderRightWidth = rightWidths[curCount - 1 + span] + "px";
+                    }
+                    curCount = curCount + span;
+                    colStyle.width = span / this.cols * 100 + "%";
+                    colEle = React.createElement("div", { className: "col-inline", style: colStyle }, child);
+                    cols.push(colEle);
+                    if (curCount + span > this.cols) {
+                        curCount = 0;
+                        cols = new Array();
+                        rowEle = React.createElement("div", { className: "row-nowrap" }, cols);
+                        rows.push(rowEle);
+                    }
+                }
+            }
+            return React.createElement(React.Fragment, null, rows);
+        };
+        Row.prototype.renderTable = function () {
+            var children = [], els = this.props.children;
+            var gutter = this.props.gutter;
+            if (Array.isArray(els)) {
+                if (isNaN(this.props.cols)) {
+                    this.cols = els.reduce(sumCol, 0);
+                }
+                else {
+                    this.cols = this.props.cols;
+                }
+                var i;
+                var ths = [], thEle;
+                for (i = 0; i < this.cols; i++) {
+                    thEle = React.createElement("th", { width: 100 / this.cols + "%" });
+                    ths.push(thEle);
+                    if (gutter && i < this.cols - 1) {
+                        thEle = React.createElement("th", { width: 0, className: "placeholder-h" }, React.createElement("div", { style: { width: gutter + 'px' } }));
+                        ths.push(thEle);
+                    }
+                }
+                children.push(React.createElement("thead", null, ths));
+                var trs = [], tds = [], tdEle = null;
+                var trEle = React.createElement("tr", null, tds);
+                trs.push(trEle);
+                var curCount = 0;
+                for (i = 0; i < els.length; i++) {
+                    var child = els[i];
+                    var span = child.props.span;
+                    curCount = curCount + span;
+                    tdEle = React.createElement("td", { colSpan: span + (gutter ? span - 1 : 0), vAlign: 'top' }, child);
+                    tds.push(tdEle);
+                    if (curCount + span > this.cols) {
+                        curCount = 0;
+                        tds = new Array();
+                        trEle = React.createElement("tr", null, tds);
+                        trs.push(trEle);
+                    }
+                    else if (gutter && curCount < this.cols) {
+                        tdEle = React.createElement("td", null, "1");
+                        tds.push(tdEle);
+                    }
+                }
+                children.push(React.createElement("tbody", null, trs));
+            }
+            var tableProps = {
+                width: "100%",
+                border: 0, cellSpacing: 0, cellPadding: 0,
+                className: "layout-table"
+            };
+            return React.createElement("table", tableProps, children);
+        };
+        Row.defaultProps = {
+            gutter: 0,
+            cols: NaN
+        };
+        return Row;
+    }(react_4.Component));
+    exports.Row = Row;
+    function timeRound(n, i) {
+        if (i % 2) {
+            return Math.round(n);
+        }
+        return -Math.round(-n);
+    }
+    function sumCol(accumulator, curr, idx, arr) {
+        return accumulator + curr.props.span;
+    }
+    function childrenToFlex(child) {
+        var style = {};
+        if (this.props.gutter) {
+            style.borderLeft = this.props.gutter + "px dotted transparent";
+        }
+        style.width = child.props.span / this.cols * 100 + "%";
+        //if(child.props.span){
+        //style.MozBoxFlex=style.WebkitBoxFlex=style.msFlex=style.flexGrow=child.props.span;
+        //}
+        return React.createElement("div", { className: "col-sider", style: style }, child);
+    }
+    function childrenToTable(child) {
+        var style = {};
+        if (this.props.gutter) {
+            style.borderLeft = this.props.gutter + "px solid transparent";
+        }
+        style.width = child.props.span / this.cols * 100 + "%";
+        //if(child.props.span){
+        //style.MozBoxFlex=style.WebkitBoxFlex=style.msFlex=style.flexGrow=child.props.span;
+        //}
+        return React.createElement("div", { className: "col-sider", style: style }, child);
+    }
+    var Col = /** @class */ (function (_super) {
+        __extends(Col, _super);
+        function Col() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Col.prototype.render = function () {
+            return this.props.children;
+        };
+        Col.defaultProps = {
+            span: 1
+        };
+        return Col;
+    }(React.Component));
+    exports.Col = Col;
+});
+define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout", "ting/grid"], function (require, exports, button_1, icon_2, router_1, layout_1, grid_1) {
     "use strict";
     function __export(m) {
         for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -781,4 +1040,5 @@ define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router",
     __export(icon_2);
     __export(router_1);
     __export(layout_1);
+    __export(grid_1);
 });

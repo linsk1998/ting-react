@@ -23,6 +23,7 @@ export=()=>
 					</article>
 				</Route>
 				<Route path="/Button" component={PageLoader} import="demo/Button"></Route>
+				<Route path="/grid" component={PageLoader} import="demo/grid"></Route>
 				<Route path="/Icon" component={PageLoader} import="demo/Icon"></Route>
 				<Route path="/Layout" component={PageLoader} import="demo/Layout"></Route>
 				<Route path="/todo" exact>
@@ -96,7 +97,7 @@ class Sidebar extends React.Component<{},{}>{
 			</div>
 			<div className="sidebar-nav-body">
 				<ul className="nav-list">
-					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf0ce;</i> Grid <small>栅格</small></Link></li>
+					<li><Link to="/grid" className="nav-list-item"><i className="fa fa-fw">&#xf0ce;</i> Grid <small>栅格</small></Link></li>
 					<li><Link to="/Layout" className="nav-list-item"><i className="fa fa-fw">&#xf0db;</i> Layout <small>布局</small></Link></li>
 				</ul>
 			</div>
