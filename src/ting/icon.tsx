@@ -3,8 +3,8 @@ import {Component} from "react";
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import apng_supported from "support/apng-supported";
-import webp_animation_supported from "support/webp-animation-supported";
+import apng_supported from "support/apng";
+import webp_animation_supported from "support/webp-animation";
 import svg_img_supported from "support/svg-img";
 
 export interface IProps{
@@ -28,7 +28,7 @@ export class Icon extends Component <IProps,IStates>{
 		}
 		return <i className="icon fa" style={style}>{children}</i>;
 	}
-	renderEmoji(size,children,rest){console.log(children);
+	renderEmoji(size,children,rest){
 		var code=toCodePoint(children);
 		var src;
 		if(svg_img_supported){
