@@ -1,7 +1,7 @@
 define("support/svg-img-plugin",[],function(){
 	return {
 		load:function(path,require,resolve){
-			var supported=false;
+			var supported:boolean=false;
 			if('SVGRect' in window){
 				var imgTest=new Image();
 				imgTest.onload=function(){
@@ -16,6 +16,8 @@ define("support/svg-img-plugin",[],function(){
 		}
 	};
 });
+
+
 declare module "support/svg-img-plugin!" {
 	const _default: true;
 	export default _default;

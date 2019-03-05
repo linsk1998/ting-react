@@ -1,7 +1,7 @@
-define("support/webp-animation-plugin",[],function(){
+define("support/webp-animation-supported-plugin",[],function(){
 	return {
 		load:function(path,require,resolve){
-			var webp_supported=false;
+			var webp_supported:boolean=false;
 			var canvas=document.createElement("canvas");
 			if(!canvas.getContext){
 				resolve(false);
@@ -25,7 +25,8 @@ define("support/webp-animation-plugin",[],function(){
 		}
 	};
 });
-declare module "support/webp-animation-plugin!" {
+
+declare module "support/webp-animation-supported-plugin!" {
 	const _default: true;
 	export default _default;
 }

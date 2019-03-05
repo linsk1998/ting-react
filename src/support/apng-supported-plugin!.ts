@@ -1,7 +1,7 @@
-define("support/apng-plugin",[],function(){
+define("support/apng-supported-plugin",[],function(){
 	return {
 		load:function(path,require,resolve){
-			var apng_supported=false;
+			var apng_supported:boolean=false;
 			var canvas=document.createElement("canvas");
 			if(!canvas.getContext){
 				resolve(false);
@@ -21,7 +21,8 @@ define("support/apng-plugin",[],function(){
 	};
 });
 
-declare module "support/apng-plugin!" {
+
+declare module "support/apng-supported-plugin!" {
 	const _default: true;
 	export default _default;
 }
