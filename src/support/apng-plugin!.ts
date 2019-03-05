@@ -1,4 +1,4 @@
-define("support/apng-supported-plugin",[],function(){
+define("support/apng-plugin",[],function(){
 	return {
 		load:function(path,require,resolve){
 			var apng_supported:boolean=false;
@@ -22,7 +22,7 @@ define("support/apng-supported-plugin",[],function(){
 });
 
 
-declare module "support/apng-supported-plugin!" {
+declare module "support/apng-plugin!" {
 	const _default: true;
 	export default _default;
 }

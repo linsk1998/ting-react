@@ -26,7 +26,7 @@ define("support/webp-animation-supported-plugin",[],function(){
 	};
 });
 
-declare module "support/webp-animation-supported-plugin!" {
+declare module "support/webp-animation-plugin!" {
 	const _default: true;
 	export default _default;
 }
