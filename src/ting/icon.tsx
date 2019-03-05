@@ -28,7 +28,7 @@ export class Icon extends Component <IProps,IStates>{
 		}
 		return <i className="icon fa" style={style}>{children}</i>;
 	}
-	renderEmoji(size,children,rest){console.log(children);
+	renderEmoji(size,children,rest){
 		var code=toCodePoint(children);
 		var src;
 		if(svg_img_supported){
@@ -96,7 +96,7 @@ export class Icon extends Component <IProps,IStates>{
 }
 
 
-function toCodePoint(unicodeSurrogates) {console.log(unicodeSurrogates.length);
+function toCodePoint(unicodeSurrogates) {
 	var r = [],
 	c = 0,
 	p = 0,

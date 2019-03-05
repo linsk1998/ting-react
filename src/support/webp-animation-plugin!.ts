@@ -1,4 +1,4 @@
-define("support/webp-animation-supported-plugin",[],function(){
+define("support/webp-animation-plugin",[],function(){
 	return {
 		load:function(path,require,resolve){
 			var webp_supported:boolean=false;
