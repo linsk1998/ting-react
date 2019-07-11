@@ -43,7 +43,7 @@ export class Icon extends Component <IProps,IStates>{
 	}
 	renderPng32(size:number,src:string,rest){
 		var style:any={
-			filter:'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="'+Sky.escapeString(new URL(src,location).href)+'", sizingMethod="scale")'
+			filter:'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="'+Sky.escapeString(new URL(src,location as any as URL).href)+'", sizingMethod="scale")'
 		};
 		style.height=style.width=size+"px";
 		return <i className="icon" style={style} {...rest}/>;

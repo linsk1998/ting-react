@@ -72,7 +72,7 @@ export class VGroup extends React.Component<LayoutProps,{}>{
 		var style:any={};
 		var height=this.props.height;
 		if(height){
-			if(isNaN(height)){
+			if(isNaN(height as any)){
 				style.height=height;
 			}else{
 				style.height=height+"px";
@@ -112,7 +112,7 @@ export class VGroup extends React.Component<LayoutProps,{}>{
 		var style:any={};
 		var height=this.props.height;
 		if(height){
-			if(isNaN(height)){
+			if(isNaN(height as any)){
 				style.height=height;
 			}else{
 				style.height=height+"px";
@@ -144,7 +144,7 @@ export class HGroup extends React.Component<LayoutProps,{}>{
 		var height=this.props.height;
 		var style:any={};
 		if(height){
-			if(isNaN(height)){
+			if(isNaN(height as any)){
 				style.height=height;
 			}else{
 				style.height=height+"px";
