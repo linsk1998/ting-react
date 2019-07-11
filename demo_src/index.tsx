@@ -2,7 +2,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import {Fragment} from "react";
-import {Link,Route,HashRouter,Layout,Header,Content,Sider} from "ting";
+import {Link,Switch,IndexRoute,Route,HashRouter,Layout,Header,Content,Sider} from "ting";
 
 export=()=>
 <Layout>
@@ -16,44 +16,54 @@ export=()=>
 		<Sider width={20}></Sider>
 		<Content>
 			<HashRouter>
-				<Route exact>
-					<article>
-						<h1>ting-react</h1>
-						<p>ting-react是一个极高兼容的React组件库</p>
-					</article>
-				</Route>
-				<Route path="/Button" component={PageLoader} import="demo/Button"></Route>
-				<Route path="/grid" component={PageLoader} import="demo/grid"></Route>
-				<Route path="/Icon" component={PageLoader} import="demo/Icon"></Route>
-				<Route path="/Layout" component={PageLoader} import="demo/Layout"></Route>
-				<Route path="/todo" exact>
-					<article>
-						<h1>此页面未完成</h1>
-					</article>
-				</Route>
+				<Switch>
+					<IndexRoute path="/" exact>
+						<article>
+							<h1>ting-react</h1>
+							<p>ting-react是一个极高兼容的React组件库</p>
+						</article>
+					</IndexRoute>
+					<Route path="/demo/:page" component={DemoPageLoader}></Route>
+					<Route path="/todo" exact>
+						<article>
+							<h1>此页面未完成</h1>
+						</article>
+					</Route>
+					<Route>
+						<article>
+							<h1>此页面不存在</h1>
+						</article>
+					</Route>
+				</Switch>
 			</HashRouter>
 		</Content>
 	</Layout>
 </Layout>;
-class PageLoader extends React.Component<{import?:string,export?:string},{component:React.ComponentType<any>,isError:boolean}>{
+class DemoPageLoader extends React.Component<any,{component:React.ComponentType<any>,isError:boolean,url:string}>{
+	cache:Map<string,React.ComponentType<any>>=new Map();
 	constructor(props){
 		super(props);
 		this.state={
+			url:null,
 			component:null,
 			isError:false
 		};
-		var me=this;
-		import(this.props.import).then(function(module){
-			if(me.props.export){
-				me.setState({component:module[me.props.export]});
-			}else{
-				me.setState({component:module});
-			}
-		},function(){
-			me.setState({isError:true});
-		});
 	}
 	render(){
+		if(!this.props.match.url.startsWith(this.state.url)){
+			var me=this;
+			var com=me.cache.get(me.props.match.url);
+			if(com){
+				return React.createElement(com, this.props, this.props.children);
+			}
+			var url=me.props.match.location;
+			import(".."+url).then(function(module){
+				me.cache.set(url,module);
+				me.setState({component:module,url:url});
+			},function(){
+				me.setState({isError:true,url:url});
+			});
+		}
 		if(this.state.isError){
 			return <div className="alert alert-danger">页面加载失败</div>
 		}
@@ -88,8 +98,8 @@ class Sidebar extends React.Component<{},{}>{
 			</div>
 			<div className="sidebar-nav-body">
 				<ul className="nav-list">
-					<li><Link to="/Button" className="nav-list-item"><i className="fa fa-fw">&#xf096;</i> Button <small>按钮</small></Link></li>
-					<li><Link to="/Icon" className="nav-list-item"><i className="fa fa-fw">&#xf2b4;</i> Icon <small>图标</small></Link></li>
+					<li><Link to="/demo/button" className="nav-list-item"><i className="fa fa-fw">&#xf096;</i> Button <small>按钮</small></Link></li>
+					<li><Link to="/demo/icon" className="nav-list-item"><i className="fa fa-fw">&#xf2b4;</i> Icon <small>图标</small></Link></li>
 				</ul>
 			</div>
 			<div className="sidebar-nav-header">
@@ -97,8 +107,8 @@ class Sidebar extends React.Component<{},{}>{
 			</div>
 			<div className="sidebar-nav-body">
 				<ul className="nav-list">
-					<li><Link to="/grid" className="nav-list-item"><i className="fa fa-fw">&#xf0ce;</i> Grid <small>栅格</small></Link></li>
-					<li><Link to="/Layout" className="nav-list-item"><i className="fa fa-fw">&#xf0db;</i> Layout <small>布局</small></Link></li>
+					<li><Link to="/demo/grid" className="nav-list-item"><i className="fa fa-fw">&#xf0ce;</i> Grid <small>栅格</small></Link></li>
+					<li><Link to="/demo/layout" className="nav-list-item"><i className="fa fa-fw">&#xf0db;</i> Layout <small>布局</small></Link></li>
 				</ul>
 			</div>
 			<div className="sidebar-nav-header">
@@ -106,6 +116,8 @@ class Sidebar extends React.Component<{},{}>{
 			</div>
 			<div className="sidebar-nav-body">
 				<ul className="nav-list">
+					<li><Link to="/demo/nav" className="nav-list-item"><i className="fa fa-fw">&#xf0c9;</i> NavLink <small>导航链接</small></Link></li>
+					<li><Link to="/demo/collapse" className="nav-list-item"><i className="fa fa-fw">&#xf0c9;</i> Collapse <small>折叠面板</small></Link></li>
 					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf141;</i> Breadcrumb <small>面包屑</small></Link></li>
 					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf0c9;</i> Navbar <small>导航条</small></Link></li>
 					<li><Link to="/todo" className="nav-list-item"><i className="fa fa-fw">&#xf152;</i> Pagination <small>分页</small></Link></li>

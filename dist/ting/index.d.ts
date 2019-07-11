@@ -1,18 +1,18 @@
 /// <reference types="react" />
-declare module "support/apng-supported-plugin!" {
+declare module "support/apng-plugin!" {
     const _default: true;
     export default _default;
 }
-declare module "support/apng-supported" {
-    import supported from "support/apng-supported-plugin!";
+declare module "support/apng" {
+    import supported from "support/apng-plugin!";
     export default supported;
 }
-declare module "support/webp-animation-supported-plugin!" {
+declare module "support/webp-animation-plugin!" {
     const _default: true;
     export default _default;
 }
-declare module "support/webp-animation-supported" {
-    import supported from "support/webp-animation-supported-plugin!";
+declare module "support/webp-animation" {
+    import supported from "support/webp-animation-plugin!";
     export default supported;
 }
 declare module "support/svg-img-plugin!" {
@@ -79,6 +79,18 @@ declare module "ting/button" {
 declare module "ting/router" {
     import { Component } from "react";
     import * as React from "react";
+    export class MemoryRouter extends Component<{}, {
+        currentPath: string;
+    }> {
+        constructor(props: any, context: any);
+        render(): JSX.Element;
+    }
+    export class BrowserRouter extends Component<{}, {
+        currentPath: string;
+    }> {
+        constructor(props: any, context: any);
+        render(): JSX.Element;
+    }
     export class HashRouter extends Component<{}, {
         currentPath: string;
     }> {
@@ -99,14 +111,47 @@ declare module "ting/router" {
         };
         render(): JSX.Element;
     }
+    export class IndexRoute extends Component<RouteProps, {}> {
+        static defaultProps: {
+            path: string;
+        };
+        render(): JSX.Element;
+    }
+    export class Switch extends Component<{}, {}> {
+        render(): JSX.Element;
+    }
+    export class NavLink extends Component<{
+        to: string;
+        activeClassName?: string;
+        exact?: boolean;
+        className?: string;
+        [key: string]: any;
+    }, any> {
+        static defaultProps: {
+            className: string;
+            activeClassName: string;
+        };
+        render(): JSX.Element;
+    }
+    export class NavItem extends Component<{
+        path?: string;
+        activeClassName?: string;
+        exact?: boolean;
+        className?: string;
+        index?: boolean;
+    }, any> {
+        static defaultProps: {
+            className: string;
+            activeClassName: string;
+        };
+        render(): JSX.Element;
+    }
     export class Link extends Component<{
         to: string;
         [key: string]: any;
     }, any> {
         render(): JSX.Element;
     }
-    export function navigate(path: any): void;
-    export function linkClickHandle(e: any): void;
 }
 declare module "ting/layout" {
     import * as React from "react";
@@ -206,7 +251,7 @@ declare module "ting/grid" {
         render(): JSX.Element;
         renderFlex(): JSX.Element;
         renderInlineBlock(): JSX.Element;
-        renderQuirks(): JSX.Element;
+        renderBorder(): JSX.Element;
         renderTable(): React.DetailedReactHTMLElement<{
             width: string;
             border: number;
@@ -222,10 +267,42 @@ declare module "ting/grid" {
         render(): React.ReactNode;
     }
 }
+declare module "ting/collapse" {
+    import { Component } from "react";
+    export interface CollapseProps {
+        inverse?: boolean;
+    }
+    export interface CollapsePanelState {
+        actived?: boolean;
+        header: string;
+        icon?: string;
+    }
+    export class Collapse extends Component<CollapseProps, {}> {
+        render(): JSX.Element;
+    }
+    export class CollapsePanel extends Component<CollapsePanelState, CollapsePanelState> {
+        constructor(props: any);
+        toggle(): void;
+        render(): JSX.Element;
+    }
+}
+declare module "ting/carousel" {
+    import { Component } from "react";
+    export interface CarouselProps {
+        autoplay?: boolean;
+        dots?: boolean;
+    }
+    export class Carousel extends Component<CarouselProps, {}> {
+        render(): any;
+    }
+    export function CarouselItem(): any;
+}
 declare module "ting" {
     export * from "ting/button";
     export * from "ting/icon";
     export * from "ting/router";
     export * from "ting/layout";
     export * from "ting/grid";
+    export * from "ting/collapse";
+    export * from "ting/carousel";
 }

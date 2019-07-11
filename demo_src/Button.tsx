@@ -53,7 +53,7 @@ export=()=><article>
 	<h2>结合 Icon</h2>
 	<ButtonToolbar>
 		<Button icon="&#xf013;">设置</Button>
-		<Button icon="⛷" type="button">按钮</Button>
+		<Button icon="🔍" type="button">按钮</Button>
 	</ButtonToolbar>
 	
 </article>;

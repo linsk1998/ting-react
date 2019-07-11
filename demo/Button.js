@@ -46,5 +46,5 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
         React.createElement("h2", null, "\u7ED3\u5408 Icon"),
         React.createElement(ting_1.ButtonToolbar, null,
             React.createElement(ting_1.Button, { icon: "\uF013" }, "\u8BBE\u7F6E"),
-            React.createElement(ting_1.Button, { icon: "\u26F7", type: "button" }, "\u6309\u94AE"))); };
+            React.createElement(ting_1.Button, { icon: "\uD83D\uDD0D", type: "button" }, "\u6309\u94AE"))); };
 });

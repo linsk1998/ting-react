@@ -26,7 +26,7 @@
     Sky.support.html5Styles = html5Styles;
     Sky.support.unknownElements = unknownElements;
 }());
-define("support/apng-supported-plugin", [], function () {
+define("support/apng-plugin", [], function () {
     return {
         load: function (path, require, resolve) {
             var apng_supported = false;
@@ -48,12 +48,12 @@ define("support/apng-supported-plugin", [], function () {
         }
     };
 });
-define("support/apng-supported", ["require", "exports", "support/apng-supported-plugin!"], function (require, exports, apng_supported_plugin_1) {
+define("support/apng", ["require", "exports", "support/apng-plugin!"], function (require, exports, apng_plugin_1) {
     "use strict";
     exports.__esModule = true;
-    exports["default"] = apng_supported_plugin_1["default"];
+    exports["default"] = apng_plugin_1["default"];
 });
-define("support/webp-animation-supported-plugin", [], function () {
+define("support/webp-animation-plugin", [], function () {
     return {
         load: function (path, require, resolve) {
             var webp_supported = false;
@@ -80,10 +80,10 @@ define("support/webp-animation-supported-plugin", [], function () {
         }
     };
 });
-define("support/webp-animation-supported", ["require", "exports", "support/webp-animation-supported-plugin!"], function (require, exports, webp_animation_supported_plugin_1) {
+define("support/webp-animation", ["require", "exports", "support/webp-animation-plugin!"], function (require, exports, webp_animation_plugin_1) {
     "use strict";
     exports.__esModule = true;
-    exports["default"] = webp_animation_supported_plugin_1["default"];
+    exports["default"] = webp_animation_plugin_1["default"];
 });
 define("support/svg-img-plugin", [], function () {
     return {
@@ -108,7 +108,7 @@ define("support/svg-img", ["require", "exports", "support/svg-img-plugin!"], fun
     exports.__esModule = true;
     exports["default"] = svg_img_plugin_1["default"];
 });
-define("ting/icon", ["require", "exports", "react", "react", "support/apng-supported", "support/webp-animation-supported", "support/svg-img"], function (require, exports, react_1, React, apng_supported_1, webp_animation_supported_1, svg_img_1) {
+define("ting/icon", ["require", "exports", "react", "react", "support/apng", "support/webp-animation", "support/svg-img"], function (require, exports, react_1, React, apng_1, webp_animation_1, svg_img_1) {
     "use strict";
     exports.__esModule = true;
     ;
@@ -125,7 +125,6 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
             return React.createElement("i", { className: "icon fa", style: style }, children);
         };
         Icon.prototype.renderEmoji = function (size, children, rest) {
-            console.log(children);
             var code = toCodePoint(children);
             var src;
             if (svg_img_1["default"]) {
@@ -171,10 +170,10 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
                 if (svg && ('SVGRect' in window)) {
                     return this.renderSVG(size, svg, rest);
                 }
-                if (apng && apng_supported_1["default"]) {
+                if (apng && apng_1["default"]) {
                     return this.renderImg(size, apng, rest);
                 }
-                if (awebp && webp_animation_supported_1["default"]) {
+                if (awebp && webp_animation_1["default"]) {
                     return this.renderImg(size, awebp, rest);
                 }
                 if (png) {
@@ -198,7 +197,6 @@ define("ting/icon", ["require", "exports", "react", "react", "support/apng-suppo
     }(react_1.Component));
     exports.Icon = Icon;
     function toCodePoint(unicodeSurrogates) {
-        console.log(unicodeSurrogates.length);
         var r = [], c = 0, p = 0, i = 0;
         while (i < unicodeSurrogates.length) {
             c = unicodeSurrogates.charCodeAt(i++);
@@ -242,7 +240,6 @@ define("ting/button", ["require", "exports", "ting/icon", "ting/utils", "react",
                 rest.href = "javascript:void 0";
             }
             if (this.props.icon) {
-                className += " btn-multiple";
                 children = btnIconChildren(this.props.icon, this.state.size, children);
             }
             return React.createElement("a", __assign({ className: className }, rest), children);
@@ -250,7 +247,6 @@ define("ting/button", ["require", "exports", "ting/icon", "ting/utils", "react",
         Button.prototype.renderButton = function (className, rest) {
             var children = this.props.children;
             if (this.props.icon) {
-                className += " btn-multiple";
                 children = btnIconChildren(this.props.icon, this.state.size, children);
             }
             return React.createElement("button", __assign({ type: "button", className: className }, rest), children);
@@ -338,8 +334,51 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
     var RouterContext = React.createContext({
         history: "hashHistory",
         location: "",
-        currentPath: ""
+        currentPath: "",
+        router: null
     });
+    var MemoryRouter = /** @class */ (function (_super) {
+        __extends(MemoryRouter, _super);
+        function MemoryRouter(props, context) {
+            var _this = _super.call(this, props, context) || this;
+            _this.state = {
+                currentPath: ""
+            };
+            return _this;
+        }
+        MemoryRouter.prototype.render = function () {
+            var context = {
+                history: 'memoryHistory',
+                location: "",
+                currentPath: "",
+                router: this
+            };
+            return React.createElement(RouterContext.Provider, { value: context }, this.props.children);
+        };
+        return MemoryRouter;
+    }(react_3.Component));
+    exports.MemoryRouter = MemoryRouter;
+    var BrowserRouter = /** @class */ (function (_super) {
+        __extends(BrowserRouter, _super);
+        function BrowserRouter(props, context) {
+            var _this = _super.call(this, props, context) || this;
+            _this.state = {
+                currentPath: location.pathname
+            };
+            return _this;
+        }
+        BrowserRouter.prototype.render = function () {
+            var context = {
+                history: 'browserHistory',
+                location: "",
+                currentPath: this.state.currentPath,
+                router: this
+            };
+            return React.createElement(RouterContext.Provider, { value: context }, this.props.children);
+        };
+        return BrowserRouter;
+    }(react_3.Component));
+    exports.BrowserRouter = BrowserRouter;
     var HashRouter = /** @class */ (function (_super) {
         __extends(HashRouter, _super);
         function HashRouter(props, context) {
@@ -359,7 +398,8 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
             var context = {
                 history: 'hashHistory',
                 location: "",
-                currentPath: this.state.currentPath
+                currentPath: this.state.currentPath,
+                router: this
             };
             return React.createElement(RouterContext.Provider, { value: context }, this.props.children);
         };
@@ -373,18 +413,7 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Route.prototype.render = function () {
-            var me = this;
-            return React.createElement(RouterContext.Consumer, null, function (context) {
-                var curPath = context.currentPath;
-                var mypath = context.location + me.props.path;
-                if (me.props.exact && curPath === mypath || (curPath + "/").startsWith(mypath + "/") && !me.props.exact) {
-                    if (me.props.component) {
-                        return React.createElement(me.props.component, me.props, me.props.children);
-                    }
-                    return me.props.children;
-                }
-                return null;
-            });
+            return React.createElement(RouterContext.Consumer, null, renderRoute.bind(this));
         };
         Route.defaultProps = {
             path: ""
@@ -392,6 +421,145 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
         return Route;
     }(react_3.Component));
     exports.Route = Route;
+    var IndexRoute = /** @class */ (function (_super) {
+        __extends(IndexRoute, _super);
+        function IndexRoute() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        IndexRoute.prototype.render = function () {
+            var me = this;
+            return React.createElement(RouterContext.Consumer, null, renderIndexRoute.bind(this));
+        };
+        IndexRoute.defaultProps = {
+            path: ""
+        };
+        return IndexRoute;
+    }(react_3.Component));
+    exports.IndexRoute = IndexRoute;
+    function renderRoute(context) {
+        var mypath = context.location + this.props.path;
+        var curPath = context.currentPath;
+        var match = checkPath(mypath, curPath, this.props.exact);
+        if (match) {
+            return renderRouteMatch.call(this, context, match);
+        }
+        return null;
+    }
+    function renderIndexRoute(context) {
+        var mypath = context.location + this.props.path;
+        var curPath = context.currentPath;
+        var match = checkPath(mypath, curPath, this.props.exact);
+        if ((context.location + "/").startsWith(context.currentPath + "/") || match) {
+            return renderRouteMatch.call(this, context, match);
+        }
+        return null;
+    }
+    function renderRouteMatch(context, match) {
+        var sub = Object.assign({}, context);
+        if (this.props.path) {
+            var url = new URL(match ? match.location : (context.location) + this.props.path, "http://localhost" + context.location);
+            sub.location = url.pathname;
+        }
+        else {
+            sub.location = context.location;
+        }
+        if (this.props.component) {
+            var props = new Object();
+            props.match = match;
+            Object.assign(props, this.props);
+            return React.createElement(RouterContext.Provider, { value: sub }, React.createElement(this.props.component, props, this.props.children));
+        }
+        return React.createElement(RouterContext.Provider, { value: sub }, this.props.children);
+    }
+    var Switch = /** @class */ (function (_super) {
+        __extends(Switch, _super);
+        function Switch() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Switch.prototype.render = function () {
+            var me = this;
+            return React.createElement(RouterContext.Consumer, null, function (context) {
+                var children = me.props.children;
+                if (Array.isArray(children)) {
+                    var result = null;
+                    for (var i = 0; i < children.length; i++) {
+                        var child = children[i];
+                        if (child.type === IndexRoute) {
+                            result = renderIndexRoute.call(child, context);
+                        }
+                        else if (child.type === Route) {
+                            result = renderRoute.call(child, context);
+                        }
+                        else {
+                            continue;
+                        }
+                        if (result) {
+                            return result;
+                        }
+                    }
+                }
+                return null;
+            });
+        };
+        return Switch;
+    }(react_3.Component));
+    exports.Switch = Switch;
+    var NavLink = /** @class */ (function (_super) {
+        __extends(NavLink, _super);
+        function NavLink() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        NavLink.prototype.render = function () {
+            var me = this;
+            var _a = this.props, to = _a.to, activeClassName = _a.activeClassName, exact = _a.exact, className = _a.className, rest = __rest(_a, ["to", "activeClassName", "exact", "className"]);
+            return React.createElement(RouterContext.Consumer, null, function (context) {
+                var mypath = context.location + me.props.path;
+                if (checkPath(mypath, context.currentPath, me.props.exact)) {
+                    className += " " + activeClassName;
+                }
+                return React.createElement(Link, { to: me.props.to, className: className }, me.props.children);
+            });
+        };
+        NavLink.defaultProps = {
+            className: "",
+            activeClassName: ""
+        };
+        return NavLink;
+    }(react_3.Component));
+    exports.NavLink = NavLink;
+    var NavItem = /** @class */ (function (_super) {
+        __extends(NavItem, _super);
+        function NavItem() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        NavItem.prototype.render = function () {
+            var me = this;
+            var _a = this.props, activeClassName = _a.activeClassName, exact = _a.exact, index = _a.index;
+            return React.createElement(RouterContext.Consumer, null, function (context) {
+                var is;
+                var mypath = context.location + me.props.path;
+                var children = me.props.children;
+                if (checkIndexPath(mypath, context.currentPath, exact, index)) {
+                    if (children && children.props) {
+                        var className = children.props.className;
+                        if (className) {
+                            children.props.className += " " + activeClassName;
+                        }
+                        else {
+                            children.props.className = activeClassName;
+                        }
+                    }
+                }
+                return children;
+            });
+        };
+        NavItem.defaultProps = {
+            className: "",
+            activeClassName: ""
+        };
+        return NavItem;
+    }(react_3.Component));
+    exports.NavItem = NavItem;
     var Link = /** @class */ (function (_super) {
         __extends(Link, _super);
         function Link() {
@@ -400,15 +568,79 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
         Link.prototype.render = function () {
             var _a = this.props, to = _a.to, rest = __rest(_a, ["to"]);
             return React.createElement(RouterContext.Consumer, null, function (context) {
-                if ('onhashchange' in window) {
-                    return React.createElement("a", __assign({ href: "#" + to }, rest));
+                var url = new URL(to, "http://localhost" + context.location + "/");
+                var path = url.pathname;
+                switch (context.history) {
+                    case "memoryHistory":
+                        return React.createElement("a", __assign({ href: "javascript:void 0" }, rest, { onClick: callLinkClickHandleByMemory(path, context) }));
+                    case "browserHistory":
+                        return React.createElement("a", __assign({ href: path }, rest));
                 }
-                return React.createElement("a", __assign({ href: "#" + to }, rest, { onClick: linkClickHandle }));
+                if (context.history == "hashHistory") {
+                    if ('onhashchange' in window) {
+                        return React.createElement("a", __assign({ href: "#" + path }, rest));
+                    }
+                }
+                return React.createElement("a", __assign({ href: "#" + path }, rest, { onClick: linkClickHandleByHash }));
             });
         };
         return Link;
     }(react_3.Component));
     exports.Link = Link;
+    function checkIndexPath(mypath, curPath, exact, index) {
+        var params;
+        if (index) {
+            if ((mypath + "/").startsWith(curPath + "/")) {
+                return true;
+            }
+        }
+        if (checkPath(mypath, curPath, exact)) {
+            return true;
+        }
+        return false;
+    }
+    function checkPath(mypath, curPath, exact) {
+        var params;
+        var r = mypath.match(/:([a-zA-Z0-9]+)/), r2;
+        var location = mypath;
+        if (r) {
+            var ppath = "^" + Sky.escapeRegExp(mypath).replace(/:([a-zA-Z0-9]+)/, "([a-zA-Z0-9]+)");
+            if (exact) {
+                ppath += "$";
+            }
+            var p = new RegExp(ppath);
+            r2 = curPath.match(p);
+            if (r2) {
+                if (!params) {
+                    params = new Map();
+                }
+                var i = r.length;
+                while (i-- > 1) {
+                    params.set(r[i], r2[i]);
+                }
+                location = r2[0];
+            }
+        }
+        if (!r || !r2) {
+            if (exact) {
+                if (curPath !== mypath) {
+                    return null;
+                }
+            }
+            else {
+                if (!(curPath + "/").startsWith(mypath + "/")) {
+                    return null;
+                }
+            }
+        }
+        return {
+            url: curPath,
+            path: mypath,
+            isExact: exact,
+            location: location,
+            params: params
+        };
+    }
     var routers = new Set();
     function currentPath() {
         var path = location.hash.replace(/^#/, "");
@@ -420,12 +652,17 @@ define("ting/router", ["require", "exports", "react", "react", "anu"], function 
             detach(path);
         }
     }
-    exports.navigate = navigate;
-    function linkClickHandle(e) {
+    function linkClickHandleByHash(e) {
         var target = e.currentTarget;
         detach(target.href.replace(/^[^#]*#/, ""));
     }
-    exports.linkClickHandle = linkClickHandle;
+    function callLinkClickHandleByMemory(path, context) {
+        return function (e) {
+            detach(context.router.setState({ currentPath: path }));
+            e.preventDefault();
+            return false;
+        };
+    }
     function onhashchange() {
         detach(currentPath());
     }
@@ -815,9 +1052,9 @@ define("ting/grid", ["require", "exports", "react", "react"], function (require,
                 return this.renderFlex();
             }
             else if (Sky.browser.quirks) {
-                return this.renderQuirks();
+                return this.renderBorder();
             }
-            return this.renderQuirks();
+            return this.renderInlineBlock();
         };
         Row.prototype.renderFlex = function () {
             var style = {};
@@ -878,7 +1115,7 @@ define("ting/grid", ["require", "exports", "react", "react"], function (require,
             }
             return React.createElement(React.Fragment, null, rows);
         };
-        Row.prototype.renderQuirks = function () {
+        Row.prototype.renderBorder = function () {
             var gutter = this.props.gutter;
             var children = this.props.children;
             var rows = [];
@@ -893,24 +1130,18 @@ define("ting/grid", ["require", "exports", "react", "react"], function (require,
                 var rowEle = React.createElement("div", { className: "row-nowrap" }, cols);
                 rows.push(rowEle);
                 var i, curCount = 0;
-                if (gutter) {
-                    var leftWidths = new Array(this.cols), rightWidths = new Array(this.cols);
-                    var avg = gutter * (this.cols - 1) / this.cols;
-                    leftWidths[0] = 0;
-                    for (i = 0; i < this.cols; i++) {
-                        if (i > 0) {
-                            leftWidths[i] = timeRound(gutter - rightWidths[i - 1], i);
-                        }
-                        rightWidths[i] = timeRound(avg - leftWidths[i], i);
-                    }
-                }
                 for (i = 0; i < children.length; i++) {
                     var child = children[i];
                     var span = child.props.span;
                     var colStyle = {};
                     if (gutter) {
-                        colStyle.borderLeftWidth = leftWidths[curCount] + "px";
-                        colStyle.borderRightWidth = rightWidths[curCount - 1 + span] + "px";
+                        var d = gutter / this.cols;
+                        if (curCount > 0) {
+                            colStyle.borderLeftWidth = (-Math.round(-d * (this.cols - curCount - 1))) + "px";
+                        }
+                        if (curCount + span < this.cols - 1) {
+                            colStyle.borderRightWidth = Math.round(d * (curCount + span + 1)) + "px";
+                        }
                     }
                     curCount = curCount + span;
                     colStyle.width = span / this.cols * 100 + "%";
@@ -984,12 +1215,6 @@ define("ting/grid", ["require", "exports", "react", "react"], function (require,
         return Row;
     }(react_4.Component));
     exports.Row = Row;
-    function timeRound(n, i) {
-        if (i % 2) {
-            return Math.round(n);
-        }
-        return -Math.round(-n);
-    }
     function sumCol(accumulator, curr, idx, arr) {
         return accumulator + curr.props.span;
     }
@@ -1030,7 +1255,74 @@ define("ting/grid", ["require", "exports", "react", "react"], function (require,
     }(React.Component));
     exports.Col = Col;
 });
-define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout", "ting/grid"], function (require, exports, button_1, icon_2, router_1, layout_1, grid_1) {
+define("ting/collapse", ["require", "exports", "react", "react"], function (require, exports, react_5, React) {
+    "use strict";
+    exports.__esModule = true;
+    var Collapse = /** @class */ (function (_super) {
+        __extends(Collapse, _super);
+        function Collapse() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Collapse.prototype.render = function () {
+            var className = "sidebar sidebar-nav";
+            if (this.props.inverse) {
+                className += " inverse sidebar-inverse";
+            }
+            return React.createElement("div", { className: className }, this.props.children);
+        };
+        return Collapse;
+    }(react_5.Component));
+    exports.Collapse = Collapse;
+    var CollapsePanel = /** @class */ (function (_super) {
+        __extends(CollapsePanel, _super);
+        function CollapsePanel(props) {
+            var _this = _super.call(this, props) || this;
+            _this.state = Object.assign({}, props);
+            return _this;
+        }
+        CollapsePanel.prototype.toggle = function () {
+            this.setState({ actived: !this.state.actived });
+        };
+        CollapsePanel.prototype.render = function () {
+            var headerClass = "sidebar-nav-header";
+            var bodyClass = "sidebar-nav-body";
+            if (this.state.actived) {
+                headerClass += " expanded";
+            }
+            else {
+                bodyClass += " collapsed";
+            }
+            var header = React.createElement(react_5.Fragment, null,
+                React.createElement("i", { className: "fa pull-right" }, "\uF107"),
+                React.createElement("span", { className: "align-middle" }, this.state.header));
+            return React.createElement(react_5.Fragment, null,
+                React.createElement("div", { className: headerClass, onClick: this.toggle.bind(this) }, header),
+                React.createElement("div", { className: bodyClass }, this.props.children));
+        };
+        return CollapsePanel;
+    }(react_5.Component));
+    exports.CollapsePanel = CollapsePanel;
+});
+define("ting/carousel", ["require", "exports", "react"], function (require, exports, react_6) {
+    "use strict";
+    exports.__esModule = true;
+    var Carousel = /** @class */ (function (_super) {
+        __extends(Carousel, _super);
+        function Carousel() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Carousel.prototype.render = function () {
+            return null;
+        };
+        return Carousel;
+    }(react_6.Component));
+    exports.Carousel = Carousel;
+    function CarouselItem() {
+        return this.props.children;
+    }
+    exports.CarouselItem = CarouselItem;
+});
+define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout", "ting/grid", "ting/collapse", "ting/carousel"], function (require, exports, button_1, icon_2, router_1, layout_1, grid_1, collapse_1, carousel_1) {
     "use strict";
     function __export(m) {
         for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -1041,4 +1333,6 @@ define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router",
     __export(router_1);
     __export(layout_1);
     __export(grid_1);
+    __export(collapse_1);
+    __export(carousel_1);
 });

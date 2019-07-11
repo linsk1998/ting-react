@@ -1,27 +1,32 @@
 define(["require", "exports", "react", "ting"], function (require, exports, React, ting_1) {
     "use strict";
-    var PageLoader = /** @class */ (function (_super) {
-        __extends(PageLoader, _super);
-        function PageLoader(props) {
+    var DemoPageLoader = /** @class */ (function (_super) {
+        __extends(DemoPageLoader, _super);
+        function DemoPageLoader(props) {
             var _this = _super.call(this, props) || this;
+            _this.cache = new Map();
             _this.state = {
+                url: null,
                 component: null,
                 isError: false
             };
-            var me = _this;
-            new Promise(function (resolve_1, reject_1) { require([_this.props["import"]], resolve_1, reject_1); }).then(function (module) {
-                if (me.props["export"]) {
-                    me.setState({ component: module[me.props["export"]] });
-                }
-                else {
-                    me.setState({ component: module });
-                }
-            }, function () {
-                me.setState({ isError: true });
-            });
             return _this;
         }
-        PageLoader.prototype.render = function () {
+        DemoPageLoader.prototype.render = function () {
+            if (!this.props.match.url.startsWith(this.state.url)) {
+                var me = this;
+                var com = me.cache.get(me.props.match.url);
+                if (com) {
+                    return React.createElement(com, this.props, this.props.children);
+                }
+                var url = me.props.match.location;
+                new Promise(function (resolve_1, reject_1) { require([".." + url], resolve_1, reject_1); }).then(function (module) {
+                    me.cache.set(url, module);
+                    me.setState({ component: module, url: url });
+                }, function () {
+                    me.setState({ isError: true, url: url });
+                });
+            }
             if (this.state.isError) {
                 return React.createElement("div", { className: "alert alert-danger" }, "\u9875\u9762\u52A0\u8F7D\u5931\u8D25");
             }
@@ -32,7 +37,7 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
                 return React.createElement("div", null, "\u52A0\u8F7D\u4E2D...");
             }
         };
-        return PageLoader;
+        return DemoPageLoader;
     }(React.Component));
     var PageHeader = /** @class */ (function (_super) {
         __extends(PageHeader, _super);
@@ -67,12 +72,12 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
                 React.createElement("div", { className: "sidebar-nav-body" },
                     React.createElement("ul", { className: "nav-list" },
                         React.createElement("li", null,
-                            React.createElement(ting_1.Link, { to: "/Button", className: "nav-list-item" },
+                            React.createElement(ting_1.Link, { to: "/demo/button", className: "nav-list-item" },
                                 React.createElement("i", { className: "fa fa-fw" }, "\uF096"),
                                 " Button ",
                                 React.createElement("small", null, "\u6309\u94AE"))),
                         React.createElement("li", null,
-                            React.createElement(ting_1.Link, { to: "/Icon", className: "nav-list-item" },
+                            React.createElement(ting_1.Link, { to: "/demo/icon", className: "nav-list-item" },
                                 React.createElement("i", { className: "fa fa-fw" }, "\uF2B4"),
                                 " Icon ",
                                 React.createElement("small", null, "\u56FE\u6807"))))),
@@ -81,12 +86,12 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
                 React.createElement("div", { className: "sidebar-nav-body" },
                     React.createElement("ul", { className: "nav-list" },
                         React.createElement("li", null,
-                            React.createElement(ting_1.Link, { to: "/grid", className: "nav-list-item" },
+                            React.createElement(ting_1.Link, { to: "/demo/grid", className: "nav-list-item" },
                                 React.createElement("i", { className: "fa fa-fw" }, "\uF0CE"),
                                 " Grid ",
                                 React.createElement("small", null, "\u6805\u683C"))),
                         React.createElement("li", null,
-                            React.createElement(ting_1.Link, { to: "/Layout", className: "nav-list-item" },
+                            React.createElement(ting_1.Link, { to: "/demo/layout", className: "nav-list-item" },
                                 React.createElement("i", { className: "fa fa-fw" }, "\uF0DB"),
                                 " Layout ",
                                 React.createElement("small", null, "\u5E03\u5C40"))))),
@@ -94,6 +99,16 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
                     React.createElement("span", { className: "align-middle" }, "\u5BFC\u822A")),
                 React.createElement("div", { className: "sidebar-nav-body" },
                     React.createElement("ul", { className: "nav-list" },
+                        React.createElement("li", null,
+                            React.createElement(ting_1.Link, { to: "/demo/nav", className: "nav-list-item" },
+                                React.createElement("i", { className: "fa fa-fw" }, "\uF0C9"),
+                                " NavLink ",
+                                React.createElement("small", null, "\u5BFC\u822A\u94FE\u63A5"))),
+                        React.createElement("li", null,
+                            React.createElement(ting_1.Link, { to: "/demo/collapse", className: "nav-list-item" },
+                                React.createElement("i", { className: "fa fa-fw" }, "\uF0C9"),
+                                " Collapse ",
+                                React.createElement("small", null, "\u6298\u53E0\u9762\u677F"))),
                         React.createElement("li", null,
                             React.createElement(ting_1.Link, { to: "/todo", className: "nav-list-item" },
                                 React.createElement("i", { className: "fa fa-fw" }, "\uF141"),
@@ -146,16 +161,17 @@ define(["require", "exports", "react", "ting"], function (require, exports, Reac
                 React.createElement(ting_1.Sider, { width: 20 }),
                 React.createElement(ting_1.Content, null,
                     React.createElement(ting_1.HashRouter, null,
-                        React.createElement(ting_1.Route, { exact: true },
-                            React.createElement("article", null,
-                                React.createElement("h1", null, "ting-react"),
-                                React.createElement("p", null, "ting-react\u662F\u4E00\u4E2A\u6781\u9AD8\u517C\u5BB9\u7684React\u7EC4\u4EF6\u5E93"))),
-                        React.createElement(ting_1.Route, { path: "/Button", component: PageLoader, "import": "demo/Button" }),
-                        React.createElement(ting_1.Route, { path: "/grid", component: PageLoader, "import": "demo/grid" }),
-                        React.createElement(ting_1.Route, { path: "/Icon", component: PageLoader, "import": "demo/Icon" }),
-                        React.createElement(ting_1.Route, { path: "/Layout", component: PageLoader, "import": "demo/Layout" }),
-                        React.createElement(ting_1.Route, { path: "/todo", exact: true },
-                            React.createElement("article", null,
-                                React.createElement("h1", null, "\u6B64\u9875\u9762\u672A\u5B8C\u6210")))))));
+                        React.createElement(ting_1.Switch, null,
+                            React.createElement(ting_1.IndexRoute, { path: "/", exact: true },
+                                React.createElement("article", null,
+                                    React.createElement("h1", null, "ting-react"),
+                                    React.createElement("p", null, "ting-react\u662F\u4E00\u4E2A\u6781\u9AD8\u517C\u5BB9\u7684React\u7EC4\u4EF6\u5E93"))),
+                            React.createElement(ting_1.Route, { path: "/demo/:page", component: DemoPageLoader }),
+                            React.createElement(ting_1.Route, { path: "/todo", exact: true },
+                                React.createElement("article", null,
+                                    React.createElement("h1", null, "\u6B64\u9875\u9762\u672A\u5B8C\u6210"))),
+                            React.createElement(ting_1.Route, null,
+                                React.createElement("article", null,
+                                    React.createElement("h1", null, "\u6B64\u9875\u9762\u4E0D\u5B58\u5728"))))))));
     };
 });

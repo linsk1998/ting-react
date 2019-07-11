@@ -13,8 +13,8 @@
 	</head>
 	<body class="layout-full">
 		<script>
-			require(["demo/index"],function(module){
-				ReactDOM.render(React.createElement(module, null,null),document.body);
+			require(["react-dom","react","demo/index"],function(ReactDOM,React,index){
+				ReactDOM.render(React.createElement(index, null,null),document.body);
 			});
 		</script>
 	</body>
