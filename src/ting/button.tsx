@@ -30,7 +30,6 @@ export class Button extends Component <ButtonProps,ButtonStates>{
 			rest.href="javascript:void 0";
 		}
 		if(this.props.icon){
-			className+=" btn-multiple";
 			children=btnIconChildren(this.props.icon,this.state.size,children)
 		}
 		return <a className={className} {...rest}>{children}</a>;
@@ -38,7 +37,6 @@ export class Button extends Component <ButtonProps,ButtonStates>{
 	renderButton(className:string,rest:object){
 		var children=this.props.children;
 		if(this.props.icon){
-			className+=" btn-multiple";
 			children=btnIconChildren(this.props.icon,this.state.size,children)
 		}
 		return <button type="button" className={className} {...rest}>{children}</button>;
