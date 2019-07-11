@@ -27,9 +27,9 @@ export class Row extends Component <RowProps,{}>{
 		if(supportFlexWrap){
 			return this.renderFlex();
 		}else if(Sky.browser.quirks){
-			return this.renderQuirks();
+			return this.renderBorder();
 		}
-		return this.renderQuirks();
+		return this.renderInlineBlock();
 	}
 	renderFlex(){
 		var style:any={};
@@ -88,7 +88,7 @@ export class Row extends Component <RowProps,{}>{
 		}
 		return <React.Fragment>{rows}</React.Fragment>;
 	}
-	renderQuirks(){
+	renderBorder(){
 		var gutter=this.props.gutter;
 		var children=this.props.children;
 		var rows=[];
@@ -102,24 +102,18 @@ export class Row extends Component <RowProps,{}>{
 			var rowEle=<div className="row-nowrap">{cols}</div>;
 			rows.push(rowEle);
 			var i,curCount=0;
-			if(gutter){
-				var leftWidths=new Array(this.cols),rightWidths=new Array(this.cols);
-				var avg=gutter*(this.cols-1)/this.cols;
-				leftWidths[0]=0;
-				for(i=0;i<this.cols;i++){
-					if(i>0){
-						leftWidths[i]=timeRound(gutter-rightWidths[i-1],i);
-					}
-					rightWidths[i]=timeRound(avg-leftWidths[i],i);
-				}
-			}
 			for(i=0;i<children.length;i++){
 				var child:any=children[i];
 				var span=child.props.span;
 				var colStyle:CSSProperties={};
 				if(gutter){
-					colStyle.borderLeftWidth=leftWidths[curCount]+"px";
-					colStyle.borderRightWidth=rightWidths[curCount-1+span]+"px";
+					var d=gutter/this.cols;
+					if(curCount>0){
+						colStyle.borderLeftWidth=(-Math.round(-d*(this.cols-curCount-1)))+"px";
+					}
+					if(curCount+span<this.cols-1){
+						colStyle.borderRightWidth=Math.round(d*(curCount+span+1))+"px";
+					}
 				}
 				curCount=curCount+span;
 				colStyle.width=span/this.cols*100+"%";
@@ -184,12 +178,6 @@ export class Row extends Component <RowProps,{}>{
 		};
 		return React.createElement("table", tableProps, children);
 	}
-}
-function timeRound(n,i){
-	if(i % 2){
-		return Math.round(n);
-	}
-	return -Math.round(-n);
 }
 function sumCol(accumulator, curr, idx, arr){
 	return accumulator + curr.props.span;
