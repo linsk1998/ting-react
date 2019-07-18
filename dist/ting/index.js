@@ -1303,7 +1303,7 @@ define("ting/collapse", ["require", "exports", "react", "react"], function (requ
     }(react_5.Component));
     exports.CollapsePanel = CollapsePanel;
 });
-define("ting/carousel", ["require", "exports", "react"], function (require, exports, react_6) {
+define("ting/carousel", ["require", "exports", "react", "react"], function (require, exports, react_6, React) {
     "use strict";
     exports.__esModule = true;
     var Carousel = /** @class */ (function (_super) {
@@ -1312,15 +1312,56 @@ define("ting/carousel", ["require", "exports", "react"], function (require, expo
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Carousel.prototype.render = function () {
-            return null;
+            this.size = this.props.children.length;
+            this.current = 0;
+            return React.createElement("div", { className: "carousel" },
+                React.createElement("div", { className: "carousel-inner" }, this.props.children.map(renderCarouselItems, this.props.children)),
+                React.createElement("div", { className: "carousel-control" },
+                    React.createElement("a", { className: "left fa", href: "javascript:;" }, "\uF104"),
+                    React.createElement("a", { className: "right fa", href: "javascript:;" }, "\uF105")),
+                CarouselIndicators(this.props));
+        };
+        Carousel.defaultProps = {
+            dots: true,
+            duration: 5000
         };
         return Carousel;
     }(react_6.Component));
     exports.Carousel = Carousel;
-    function CarouselItem() {
+    function CarouselIndicators(props) {
+        if (props.dots) {
+            return React.createElement("ol", { className: "carousel-indicators" }, props.children.map(renderCarouselIndicators, props.children));
+        }
+        return null;
+    }
+    function renderCarouselIndicators() {
+        return React.createElement("li", { className: "fa" }, "\uF111");
+    }
+    function renderCarouselItems(item) {
+        return React.createElement("div", { className: "item" }, item);
+    }
+    function CarouselItem(props) {
         return this.props.children;
     }
     exports.CarouselItem = CarouselItem;
+    function CarouselCaption() {
+        return React.createElement("div", { className: "carousel-caption" }, "this.props.children");
+    }
+    exports.CarouselCaption = CarouselCaption;
+    function autoNext() {
+        $("div[role=carousel]", document).each(function () {
+            var $carousel = $(this);
+            var $items = $carousel.find('.carousel-inner>.item');
+            var index = $items.filter(".active").index(".item");
+            if (index < $items.length - 1) {
+                index++;
+                setIndex($carousel, index);
+            }
+            else {
+                setIndex($carousel, 0);
+            }
+        });
+    }
 });
 define("ting", ["require", "exports", "ting/button", "ting/icon", "ting/router", "ting/layout", "ting/grid", "ting/collapse", "ting/carousel"], function (require, exports, button_1, icon_2, router_1, layout_1, grid_1, collapse_1, carousel_1) {
     "use strict";

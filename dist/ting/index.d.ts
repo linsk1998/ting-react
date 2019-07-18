@@ -289,13 +289,25 @@ declare module "ting/collapse" {
 declare module "ting/carousel" {
     import { Component } from "react";
     export interface CarouselProps {
-        autoplay?: boolean;
         dots?: boolean;
+        duration?: number;
+        children: Array<any>;
+    }
+    export interface CarouselItemProps {
+        active?: boolean;
+        children?: any;
     }
     export class Carousel extends Component<CarouselProps, {}> {
-        render(): any;
+        static defaultProps: {
+            dots: boolean;
+            duration: number;
+        };
+        current: number;
+        size: number;
+        render(): JSX.Element;
     }
-    export function CarouselItem(): any;
+    export function CarouselItem(props?: CarouselItemProps): any;
+    export function CarouselCaption(): JSX.Element;
 }
 declare module "ting" {
     export * from "ting/button";
